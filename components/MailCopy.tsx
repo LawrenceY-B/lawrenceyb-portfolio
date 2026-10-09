@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/** Copies the email address to the clipboard, falling back to selecting it. */
 export function MailCopy({ email }: { email: string }) {
   const [status, setStatus] = useState("");
   const text = useRef<HTMLSpanElement>(null);

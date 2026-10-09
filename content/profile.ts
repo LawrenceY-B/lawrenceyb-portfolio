@@ -32,9 +32,10 @@ export const stack = [
   { group: "Also fluent", items: ["React", "Next.js", "Node · Express", "Tailwind"] },
   { group: "Exploring", items: ["Flutter · Dart", "Java", "Spring Boot"] },
   { group: "Ship", items: ["Azure DevOps", "AWS · Vercel", "MongoDB · SQL", "Figma"] },
+  { group: "Other", items: ["Git · GitHub", "Jest"] },
 ] as const;
 
-export const builds = ["web & mobile apps.", "APIs.", "things that ship."] as const;
+export const builds = ["web apps.", "APIs.", "things that ship."] as const;
 
 export const hobbies = [
   {
