@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { Cursor, ParticleCanvas } from "@/components/Chrome";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SHAPE } from "@/content/projects";
 import { CaseExperience } from "@/features/motion/CaseExperience";
@@ -14,7 +13,6 @@ export const metadata: Metadata = { title: `404 · ${site.shortName}` };
 export default function NotFound() {
   return (
     <>
-      <ParticleCanvas />
       <main className="case lost">
         <div className="case-in">
           <span className="mono muted">{"// error 404 · not found"}</span>
@@ -31,7 +29,6 @@ export default function NotFound() {
           </div>
         </div>
       </main>
-      <Cursor />
       <CaseExperience shape={SHAPE.bulb} />
     </>
   );

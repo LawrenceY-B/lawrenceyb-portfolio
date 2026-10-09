@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Fragment } from "react";
 
-import { Cursor, ParticleCanvas } from "@/components/Chrome";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getProject, projects } from "@/content/projects";
 import { Back } from "@/features/case-study/Back";
@@ -44,7 +43,6 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
 
   return (
     <>
-      <ParticleCanvas />
       <main className="case">
         <div className="case-in">
           <div className="case-top">
@@ -95,7 +93,6 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           </nav>
         </div>
       </main>
-      <Cursor />
       <CaseExperience shape={p.shape} />
     </>
   );

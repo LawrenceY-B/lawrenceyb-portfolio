@@ -1,7 +1,7 @@
 import { gsap } from "gsap";
 import * as THREE from "three";
 
-import { watch } from "@/lib/store";
+import { ui, watch } from "@/lib/store";
 
 import { fragmentShader, vertexShader } from "./shaders";
 
@@ -30,10 +30,13 @@ const smooth = (v: number) => v * v * (3 - 2 * v);
 export function createParticles(
   canvas: HTMLCanvasElement,
   data: Prepared,
-  /** `shape` pins the cloud to one shape (case study pages) instead of following scroll. */
-  opts: { reduce: boolean; narrow: boolean; scroll: () => ScrollInput; shape?: number },
+  /**
+   * `scroll` drives the shape while no page holds one (home); null keeps the last position.
+   * A page holds a shape through the store's `sceneShape` (case studies, 404).
+   */
+  opts: { reduce: boolean; narrow: boolean; scroll: () => ScrollInput | null },
 ): Particles {
-  const { reduce, narrow, shape: fixed } = opts;
+  const { reduce, narrow } = opts;
   const { head, hb, rnd, uv, tex } = data;
   const dt = new THREE.DataTexture(tex, TW, TH, THREE.RGBAFormat, THREE.FloatType);
   dt.minFilter = dt.magFilter = THREE.NearestFilter;
@@ -186,6 +189,30 @@ export function createParticles(
     }
   });
 
+  // Held shape: morph from whatever is on screen to the page's shape. `t` tweens 0 → 1.
+  let held: { from: number; to: number; t: { value: number } } | null = null;
+  let shown = 0;
+  const hold = (shape: number | null) => {
+    if (held) gsap.killTweensOf(held.t);
+    if (shape === null) {
+      // Back to scroll: hand the held shape to the hover layer, which fades into the scroll shape.
+      if (held) {
+        hoverId = held.t.value > 0.5 ? held.to : held.from;
+        hoverOn = false;
+        U.uHMix.value = 1;
+      }
+      held = null;
+      return;
+    }
+    const from = U.uHMix.value > 0.5 ? hoverId : shown;
+    U.uHMix.value = 0;
+    hoverOn = false;
+    held = { from, to: shape, t: { value: from === shape ? 1 : 0 } };
+    gsap.to(held.t, { value: 1, duration: reduce ? 0 : 1.6, ease: "power2.inOut" });
+  };
+  hold(ui.getState().sceneShape);
+  const offHold = watch("sceneShape", hold);
+
   const clock = new THREE.Clock();
   let seg: number | null = null;
   let poS = 0;
@@ -199,13 +226,17 @@ export function createParticles(
     lastT = t;
     const kk = 1 - Math.exp(-d * 3.2);
     const ts = opts.scroll();
-    if (seg === null) seg = ts.seg;
-    seg += (ts.seg - seg) * (reduce ? 1 : kk);
-    poS += (ts.po - poS) * (reduce ? 1 : kk * 1.5);
-    const i = Math.max(0, Math.min(IDS.length - 2, Math.floor(seg)));
-    const f = fixed === undefined ? Math.min(1, seg - i) : 0;
-    const idA = fixed ?? IDS[i]!;
-    const idB = fixed ?? IDS[i + 1]!;
+    if (ts) {
+      if (seg === null) seg = ts.seg;
+      seg += (ts.seg - seg) * (reduce ? 1 : kk);
+      poS += (ts.po - poS) * (reduce ? 1 : kk * 1.5);
+    }
+    const sg = seg ?? 0;
+    const i = Math.max(0, Math.min(IDS.length - 2, Math.floor(sg)));
+    const f = held ? held.t.value : Math.min(1, sg - i);
+    const idA = held ? held.from : IDS[i]!;
+    const idB = held ? held.to : IDS[i + 1]!;
+    shown = f < 0.5 ? idA : idB;
     const A = cfg(idA, i, poS);
     const B = cfg(idB, i + 1, poS);
     U.uA.value = idA;
@@ -221,8 +252,8 @@ export function createParticles(
     U.uH.value = hoverId;
     U.uHOff.value.set(H[0], H[1], 0);
     U.uHScl.value = H[2];
-    // Hover only applies while the work shape is showing.
-    const inWork = (idA === WORK_SHAPE && f < 0.5) || (idB === WORK_SHAPE && f >= 0.5);
+    // Hover only applies while the work shape is showing (and no page holds a shape).
+    const inWork = !held && shown === WORK_SHAPE;
     const hTarget = hoverOn && inWork ? 1 : 0;
     U.uHMix.value += (hTarget - U.uHMix.value) * (reduce ? 1 : 1 - Math.exp(-d * 5));
     const carX = cfg(CAR_SHAPE, 0, poS)[0];
@@ -246,6 +277,8 @@ export function createParticles(
       ac.abort();
       offTheme();
       offHover();
+      offHold();
+      if (held) gsap.killTweensOf(held.t);
       gsap.killTweensOf(U.uHover);
       gsap.killTweensOf(U.uAssemble);
       g.dispose();

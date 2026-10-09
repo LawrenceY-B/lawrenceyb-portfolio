@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { preload } from "react-dom";
 
+import { Cursor, ParticleCanvas } from "@/components/Chrome";
+import { SiteMotion } from "@/features/motion/SiteMotion";
 import { DATA_URL } from "@/features/particles/data";
 import { site } from "@/lib/site";
 
@@ -76,7 +78,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {/* Site-wide and persistent: the cloud morphs between pages instead of reloading. */}
+        <ParticleCanvas />
+        {children}
+        <Cursor />
+        <SiteMotion />
+      </body>
     </html>
   );
 }

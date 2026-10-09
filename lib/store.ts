@@ -11,6 +11,8 @@ export type UiState = {
   theme: "light" | "dark";
   /** Whether inspect mode is on. */
   inspect: boolean;
+  /** Particle shape a page holds (case studies, 404), or null to follow scroll (home). */
+  sceneShape: number | null;
   /** Slug of the case study last opened from the project list; home scrolls back to its row. */
   lastCase: string | null;
 };
@@ -20,6 +22,7 @@ export const ui = createStore<UiState>()(() => ({
   theme: "light",
   inspect: false,
   lastCase: null,
+  sceneShape: null,
 }));
 
 /** Calls `fn` whenever `key` changes. Returns an unsubscribe. */

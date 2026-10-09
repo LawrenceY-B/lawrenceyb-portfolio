@@ -2,18 +2,14 @@ import { gsap } from "gsap";
 
 import { prefersReducedMotion } from "@/lib/media";
 
-import {
-  gather,
-  type MotionEnv,
-  startCursor,
-  startGlass,
-  startParticles,
-  startSmoothScroll,
-} from "./shared";
+import { ui } from "@/lib/store";
+
+import { type MotionEnv, startGlass, startSmoothScroll } from "./shared";
 
 /**
- * Case study pages and the 404: the same smooth scroll, glass, cursor and particle cloud as home, with the
- * cloud held on the project's own shape. Returns a cleanup, like `initExperience`.
+ * Case study pages and the 404: the same smooth scroll and glass as home, with the site-wide
+ * particle cloud held on the page's shape (it morphs there from whatever was showing).
+ * Returns a cleanup, like `initExperience`.
  */
 export function initCaseExperience(shape: number): () => void {
   const reduce = prefersReducedMotion();
@@ -27,12 +23,9 @@ export function initCaseExperience(shape: number): () => void {
   const ctx = gsap.context(() => {
     startSmoothScroll(env);
     startGlass(env);
-    startCursor(env);
   });
-
-  void startParticles(env, { scroll: () => ({ seg: 0, po: 0 }), shape }).then((p) => {
-    if (p && !reduce) gather(p);
-  });
+  ui.setState({ sceneShape: shape });
+  cleanups.push(() => ui.setState({ sceneShape: null }));
 
   return () => {
     ac.abort();
