@@ -653,6 +653,9 @@ section {
   position: relative;
   transition: opacity 0.35s;
 }
+.row {
+  scroll-margin-top: 30vh;
+}
 .row .open {
   all: unset;
   position: absolute;

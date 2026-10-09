@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 
 import type { Project } from "@/content/projects";
 import { ui } from "@/lib/store";
@@ -9,6 +10,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Project rows. Hovering one forms its particle shape; clicking opens /work/<slug>. */
 export function Work({ projects }: { projects: Project[] }) {
+  // Leaving via a row never fires pointerleave; clear it so the same row can form its shape again.
+  useEffect(() => () => ui.setState({ hoveredShape: null }), []);
+
   return (
     <ul className="rows">
       {projects.map((proj, i) => {
@@ -17,6 +21,7 @@ export function Work({ projects }: { projects: Project[] }) {
         return (
           <li
             key={proj.slug}
+            id={`work-${proj.slug}`}
             className="row"
             data-inspect="ProjectRow"
             data-cursor="Open case"
@@ -38,6 +43,7 @@ export function Work({ projects }: { projects: Project[] }) {
               className="open"
               href={`/work/${proj.slug}`}
               aria-label={`Open case study: ${proj.name}`}
+              onClick={() => ui.setState({ lastCase: proj.slug })}
             />
           </li>
         );

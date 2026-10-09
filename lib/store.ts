@@ -11,12 +11,15 @@ export type UiState = {
   theme: "light" | "dark";
   /** Whether inspect mode is on. */
   inspect: boolean;
+  /** Slug of the case study last opened from the project list; home scrolls back to its row. */
+  lastCase: string | null;
 };
 
 export const ui = createStore<UiState>()(() => ({
   hoveredShape: null,
   theme: "light",
   inspect: false,
+  lastCase: null,
 }));
 
 /** Calls `fn` whenever `key` changes. Returns an unsubscribe. */
