@@ -1,25 +1,25 @@
 import { createStore } from "zustand/vanilla";
 
 /**
- * Shared UI state. React components (ticker, case sheet, theme, inspect) and the imperative
+ * Shared UI state. React components (project rows, theme, inspect) and the imperative
  * motion/particle modules read and write it instead of sharing DOM globals.
  */
 export type UiState = {
   /** The hovered/focused project row's particle shape id, or null when none. */
   hoveredShape: number | null;
-  /** Whether the case-study sheet is open; smooth scroll pauses while it is. */
-  sheetOpen: boolean;
   /** The resolved colour scheme. */
   theme: "light" | "dark";
   /** Whether inspect mode is on. */
   inspect: boolean;
+  /** Slug of the case study last opened from the project list; home scrolls back to its row. */
+  lastCase: string | null;
 };
 
 export const ui = createStore<UiState>()(() => ({
   hoveredShape: null,
-  sheetOpen: false,
   theme: "light",
   inspect: false,
+  lastCase: null,
 }));
 
 /** Calls `fn` whenever `key` changes. Returns an unsubscribe. */

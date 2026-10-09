@@ -1,20 +1,23 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Lenis from "lenis";
 
-import { watch } from "@/lib/store";
-import { hasFinePointer, prefersReducedMotion } from "@/lib/media";
+import { prefersReducedMotion } from "@/lib/media";
+import { ui } from "@/lib/store";
 import { marketReady } from "@/features/market/store";
-import { loadHead } from "@/features/particles/data";
-import { prepareAsync } from "@/features/particles/prepareAsync";
 import type { Particles, ScrollInput } from "@/features/particles/scene";
 
+import {
+  $,
+  gather,
+  type MotionEnv,
+  startCursor,
+  startGlass,
+  startParticles,
+  startSmoothScroll,
+} from "./shared";
 import { slotter } from "./slots";
 import { scramble, split } from "./text";
 
-gsap.registerPlugin(ScrollTrigger);
-
-const $ = <T extends Element = HTMLElement>(s: string) => document.querySelector<T>(s);
 const $$ = <T extends Element = HTMLElement>(s: string) =>
   Array.from(document.querySelectorAll<T>(s));
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
@@ -31,47 +34,26 @@ export function initExperience(): () => void {
   const ac = new AbortController();
   const { signal } = ac;
   const cleanups: (() => void)[] = [];
+  const env: MotionEnv = { signal, cleanups, reduce };
+  // No js-loading means the preloader already ran this visit (e.g. back from a case study).
+  const returning = !root.classList.contains("js-loading");
   let particles: Particles | null = null;
   let introPlayed = false;
-  let lenis: Lenis | null = null;
   let buildST: ScrollTrigger | null = null;
   let offST: ScrollTrigger | null = null;
 
-  const ctx = gsap.context(() => {
-    /* ---------- Smooth scroll ---------- */
-    if (!reduce) {
-      lenis = new Lenis({ lerp: 0.09 });
-      lenis.on("scroll", ScrollTrigger.update);
-      const raf = (t: number) => lenis?.raf(t * 1000);
-      gsap.ticker.add(raf);
-      gsap.ticker.lagSmoothing(0);
-      cleanups.push(() => {
-        gsap.ticker.remove(raf);
-        gsap.ticker.lagSmoothing(500, 33);
-        lenis?.destroy();
-        lenis = null;
-      });
-    }
-    document.addEventListener(
-      "click",
-      (e) => {
-        const a = (e.target as Element | null)?.closest<HTMLAnchorElement>('a[href^="#"]');
-        const id = a?.getAttribute("href");
-        const t = id && id.length > 1 ? document.querySelector<HTMLElement>(id) : null;
-        if (!t) return;
-        e.preventDefault();
-        if (lenis) lenis.scrollTo(t, { duration: 1.6 });
-        else t.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
-      },
-      { signal },
-    );
-    cleanups.push(watch("sheetOpen", (open) => (open ? lenis?.stop() : lenis?.start())));
+  const lenis = startSmoothScroll(env);
 
+  const ctx = gsap.context(() => {
     /* ---------- Pinned slots ---------- */
     const build = $("#build");
     if (!reduce && build) {
+      // Look these up once: ScrollTrigger can still fire while the page is torn down.
+      const bIdx = $("#bIdx")!;
+      const oIdx = $("#oIdx")!;
+      const barFill = $("#barFill");
       const showB = slotter($$("#slot .w"), (n) => {
-        $("#bIdx")!.textContent = String(n + 1).padStart(2, "0");
+        bIdx.textContent = String(n + 1).padStart(2, "0");
         build.dataset.step = String(n);
       });
       buildST = ScrollTrigger.create({
@@ -82,13 +64,13 @@ export function initExperience(): () => void {
         scrub: true,
         onUpdate: (st) => {
           showB(Math.min(2, Math.floor(st.progress * 3)));
-          gsap.set("#barFill", { scaleX: 0.02 + st.progress * 0.98 });
+          gsap.set(barFill, { scaleX: 0.02 + st.progress * 0.98 });
         },
       });
       const chips = $$("#ochips .gbtn");
       const showD = slotter($$("#odesc p"));
       const showO = slotter($$("#oslot .w"), (n) => {
-        $("#oIdx")!.textContent = String(n + 1).padStart(2, "0");
+        oIdx.textContent = String(n + 1).padStart(2, "0");
         chips.forEach((c, k) => c.classList.toggle("hot", k === n));
         showD(n);
       });
@@ -168,7 +150,7 @@ export function initExperience(): () => void {
         );
     };
     const ready = marketReady();
-    if (reduce) {
+    if (reduce || returning) {
       root.classList.remove("js-loading");
       introPlayed = true;
     } else {
@@ -235,85 +217,11 @@ export function initExperience(): () => void {
       });
     }
 
-    /* ---------- Glass: shine follows the pointer, blob tracks nav items ---------- */
-    document.addEventListener(
-      "pointermove",
-      (e) => {
-        const el = (e.target as Element | null)?.closest<HTMLElement>(".glass, .gbtn");
-        if (!el) return;
-        const b = el.getBoundingClientRect();
-        el.style.setProperty("--mx", `${((e.clientX - b.left) / b.width) * 100}%`);
-      },
-      { signal },
-    );
-    const glass = $("#glass");
-    const blob = $("#blob");
-    if (glass && blob) {
-      glass.querySelectorAll("a, button").forEach((it) =>
-        it.addEventListener(
-          "pointerenter",
-          () => {
-            const b = glass.getBoundingClientRect();
-            const r = it.getBoundingClientRect();
-            gsap.to(blob, {
-              left: r.left - b.left,
-              width: r.width,
-              opacity: 1,
-              duration: reduce ? 0 : 0.6,
-              ease: "elastic.out(1, .65)",
-            });
-          },
-          { signal },
-        ),
-      );
-      glass.addEventListener("pointerleave", () => gsap.to(blob, { opacity: 0, duration: 0.3 }), {
-        signal,
-      });
-    }
-
-    /* ---------- Cursor ---------- */
-    const me = $("#me");
-    const meName = $("#meName");
-    if (me && meName && hasFinePointer() && !reduce) {
-      const label = (t: string | null) => {
-        if (t) meName.textContent = t;
-        me.classList.toggle("label", !!t);
-      };
-      document.body.classList.add("has-cursor");
-      cleanups.push(() => document.body.classList.remove("has-cursor"));
-      const mx = gsap.quickTo(me, "x", { duration: 0.1, ease: "power3" });
-      const my = gsap.quickTo(me, "y", { duration: 0.1, ease: "power3" });
-      window.addEventListener("pointermove", (e) => (mx(e.clientX), my(e.clientY)), { signal });
-      window.addEventListener("pointerdown", () => me.classList.add("press"), { signal });
-      window.addEventListener("pointerup", () => me.classList.remove("press"), { signal });
-      document.addEventListener("pointerleave", () => gsap.to(me, { opacity: 0, duration: 0.2 }), {
-        signal,
-      });
-      document.addEventListener("pointerenter", () => gsap.to(me, { opacity: 1, duration: 0.2 }), {
-        signal,
-      });
-      // Any element with data-cursor="Label" shows that label while hovered.
-      document.addEventListener(
-        "pointerover",
-        (e) => {
-          const el = (e.target as Element | null)?.closest<HTMLElement>("[data-cursor]");
-          if (el) label(el.dataset.cursor ?? null);
-        },
-        { signal },
-      );
-      document.addEventListener(
-        "pointerout",
-        (e) => {
-          const from = (e.target as Element | null)?.closest("[data-cursor]");
-          const to = (e.relatedTarget as Element | null)?.closest("[data-cursor]");
-          if (from && from !== to) label(null);
-        },
-        { signal },
-      );
-    }
+    startGlass(env);
+    startCursor(env);
   });
 
-  /* ---------- Particles (Three.js is code-split and loaded after first paint) ---------- */
+  /* ---------- Particles ---------- */
   const rect = (id: string) => document.getElementById(id)?.getBoundingClientRect();
   const enter = (id: string) => {
     const vh = window.innerHeight;
@@ -344,41 +252,34 @@ export function initExperience(): () => void {
       po: offST ? offST.progress : 0,
     };
   };
-  const canvas = $<HTMLCanvasElement>("#gl");
-  if (canvas) {
-    // Fetch and prepare the point data in a worker while the Three.js chunk downloads.
-    void Promise.all([
-      import("@/features/particles/scene"),
-      loadHead(signal).then((buf) => prepareAsync(buf, signal)),
-    ])
-      .then(([mod, data]) => {
-        if (signal.aborted) return;
-        particles = mod.createParticles(canvas, data, {
-          reduce,
-          narrow: window.innerWidth < 760,
-          scroll: scrollInput,
-        });
-        // Intro already ran (slow network): gather the cloud now instead.
-        if (introPlayed && !reduce)
-          gsap.fromTo(
-            particles.assemble,
-            { value: 0 },
-            { value: 1, duration: 3, ease: "power2.inOut" },
-          );
-      })
-      .catch((err: unknown) => {
-        if (signal.aborted) return;
-        console.error(err);
-        canvas.style.display = "none";
-      });
+  void startParticles(env, { scroll: scrollInput }).then((p) => {
+    particles = p;
+    // Intro already ran (slow network, or back from a case study): gather the cloud now instead.
+    if (p && introPlayed && !reduce) gather(p);
+  });
+
+  /* ---------- Back from a case study: land on its row ---------- */
+  if (reduce || returning) {
+    const { lastCase } = ui.getState();
+    const id = location.hash.startsWith("#work-")
+      ? decodeURIComponent(location.hash.slice(1))
+      : lastCase && `work-${lastCase}`;
+    const row = id ? document.getElementById(id) : null;
+    if (row) {
+      ScrollTrigger.refresh();
+      if (lenis) lenis.scrollTo(row, { immediate: true, offset: -window.innerHeight / 3 });
+      else row.scrollIntoView({ block: "center" });
+      row.querySelector<HTMLElement>(".open")?.focus({ preventScroll: true });
+    }
+    ui.setState({ lastCase: null });
   }
+
   const onResize = () => ScrollTrigger.refresh();
   window.addEventListener("resize", onResize, { signal });
 
   return () => {
     ac.abort();
     cleanups.forEach((fn) => fn());
-    particles?.dispose();
     particles = null;
     ctx.revert();
   };

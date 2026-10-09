@@ -13,7 +13,10 @@ animation frame and risk visual regressions in a design that already works.
 ## Decision
 
 - Markup is server-rendered (static export) from typed content in `content/`.
-- UI with real state (ticker, case-study sheet, theme, inspect mode, copy-email, deploy button) are
+- Case studies are their own statically exported routes (`app/work/[slug]`), not an overlay. They
+  reuse the motion layer through `features/motion/shared.ts` (smooth scroll, glass, cursor,
+  particles), with the particle cloud held on the project's own shape.
+- UI with real state (ticker, theme, inspect mode, copy-email, deploy button) are
   React client components.
 - Everything frame-driven lives in plain TypeScript modules under `features/motion` and
   `features/particles`, started once by `<Experience />` in a `useEffect` and torn down by the

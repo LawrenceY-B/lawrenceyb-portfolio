@@ -22,6 +22,29 @@ test.describe("with motion", () => {
       "● Offline",
     );
   });
+
+  test("case studies share the motion layer and back lands on the row", async ({
+    page,
+    errors,
+  }) => {
+    await mockMarket(page);
+    await page.goto("/");
+    await expect(page.locator("html")).not.toHaveClass(/js-loading/, { timeout: 15_000 });
+    await page.getByRole("link", { name: "Open case study: EduSearch" }).click();
+    await expect(page).toHaveURL(/\/work\/edusearch\/?$/);
+    await expect(page.locator("#gl")).toBeVisible();
+    if (test.info().project.name === "desktop")
+      await expect(page.locator("body")).toHaveClass(/has-cursor/);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("#loader")).toBeHidden();
+    await expect(page.locator("#work-edusearch")).toBeInViewport();
+    const before = await page.evaluate(() => window.scrollY);
+    await page.mouse.move(400, 300);
+    await page.mouse.wheel(0, 600);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).not.toBe(before);
+    expect(errors).toEqual([]);
+  });
 });
 
 test.describe("reduced motion", () => {
@@ -37,31 +60,40 @@ test.describe("reduced motion", () => {
     expect(errors).toEqual([]);
   });
 
-  test("case study opens as a modal, traps focus, closes on Escape", async ({ page }) => {
+  test("project rows open case study pages; Back returns to the row", async ({ page }) => {
     await mockMarket(page);
     await page.goto("/");
-    const opener = page.getByRole("button", { name: "Open case study: Treasury Bills API" });
-    await opener.click();
-    const dialog = page.getByRole("dialog", { name: "Treasury Bills API" });
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole("button", { name: /Close/ })).toBeFocused();
-    await expect(dialog.getByRole("link", { name: "API docs ↗" })).toHaveAttribute(
-      "rel",
-      /noopener/,
-    );
-    // Background is inert, so Tab cycles only through the sheet.
-    for (let i = 0; i < 5; i++) {
-      await page.keyboard.press("Tab");
-      expect(
-        await page.evaluate(
-          () =>
-            !!document.activeElement?.closest("#sheet") || document.activeElement === document.body,
-        ),
-      ).toBe(true);
-    }
+    await page.getByRole("link", { name: "Open case study: Treasury Bills API" }).click();
+    await expect(page).toHaveURL(/\/work\/treasury-bills-api\/?$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Treasury Bills API" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "API docs ↗" })).toHaveAttribute("rel", /noopener/);
+    await page.getByRole("link", { name: "← Back · Esc" }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("#work-treasury-bills-api")).toBeInViewport();
+    await expect(
+      page.getByRole("link", { name: "Open case study: Treasury Bills API" }),
+    ).toBeFocused();
+  });
+
+  test("Escape on a case study goes back to its row", async ({ page }) => {
+    await mockMarket(page);
+    await page.goto("/");
+    await page.getByRole("link", { name: "Open case study: EduSearch" }).click();
+    await expect(page.getByRole("heading", { level: 1, name: "EduSearch" })).toBeVisible();
     await page.keyboard.press("Escape");
-    await expect(dialog).toBeHidden();
-    await expect(opener).toBeFocused();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("#work-edusearch")).toBeInViewport();
+  });
+
+  test("case study pages load directly and Back goes to the row", async ({ page }) => {
+    await mockMarket(page);
+    await page.goto("/work/edusearch");
+    await expect(page.getByRole("heading", { level: 1, name: "EduSearch" })).toBeVisible();
+    await page.getByRole("link", { name: /Next →/ }).click();
+    await expect(page).toHaveURL(/\/work\/trade-sim\/?$/);
+    await page.getByRole("link", { name: "← Back · Esc" }).click();
+    await expect(page).toHaveURL(/\/#work-trade-sim$/);
+    await expect(page.locator("#work-trade-sim")).toBeInViewport();
   });
 
   test("theme toggle persists across reloads", async ({ page }) => {

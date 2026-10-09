@@ -30,9 +30,10 @@ const smooth = (v: number) => v * v * (3 - 2 * v);
 export function createParticles(
   canvas: HTMLCanvasElement,
   data: Prepared,
-  opts: { reduce: boolean; narrow: boolean; scroll: () => ScrollInput },
+  /** `shape` pins the cloud to one shape (case study pages) instead of following scroll. */
+  opts: { reduce: boolean; narrow: boolean; scroll: () => ScrollInput; shape?: number },
 ): Particles {
-  const { reduce, narrow } = opts;
+  const { reduce, narrow, shape: fixed } = opts;
   const { head, hb, rnd, uv, tex } = data;
   const dt = new THREE.DataTexture(tex, TW, TH, THREE.RGBAFormat, THREE.FloatType);
   dt.minFilter = dt.magFilter = THREE.NearestFilter;
@@ -202,9 +203,9 @@ export function createParticles(
     seg += (ts.seg - seg) * (reduce ? 1 : kk);
     poS += (ts.po - poS) * (reduce ? 1 : kk * 1.5);
     const i = Math.max(0, Math.min(IDS.length - 2, Math.floor(seg)));
-    const f = Math.min(1, seg - i);
-    const idA = IDS[i]!;
-    const idB = IDS[i + 1]!;
+    const f = fixed === undefined ? Math.min(1, seg - i) : 0;
+    const idA = fixed ?? IDS[i]!;
+    const idB = fixed ?? IDS[i + 1]!;
     const A = cfg(idA, i, poS);
     const B = cfg(idB, i + 1, poS);
     U.uA.value = idA;
