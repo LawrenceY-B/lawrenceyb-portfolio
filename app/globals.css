@@ -984,6 +984,44 @@ footer .build a:hover {
   background: color-mix(in srgb, var(--bg) 70%, transparent);
   backdrop-filter: blur(6px);
 }
+.lost .log pre {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+}
+.lost .term {
+  cursor: text;
+  width: min(100%, 560px);
+}
+.lost .prompt {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.lost .prompt input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  caret-color: var(--red);
+  outline: none;
+}
+.lost .prompt .caret {
+  /* Sits where typing starts, after "$ ", until the prompt has focus. */
+  position: absolute;
+  left: 2ch;
+  pointer-events: none;
+}
+.lost .prompt:focus-within .caret {
+  display: none;
+}
+.lost .term:focus-within {
+  border-color: color-mix(in srgb, var(--ink) 35%, transparent);
+}
 .lost .log b {
   color: var(--red);
   font-weight: 500;

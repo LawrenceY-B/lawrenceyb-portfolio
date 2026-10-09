@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SHAPE } from "@/content/projects";
 import { CaseExperience } from "@/features/motion/CaseExperience";
-import { RequestLog } from "@/features/not-found/RequestLog";
+import { Terminal } from "@/features/not-found/Terminal";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = { title: `404 · ${site.shortName}` };
@@ -20,7 +20,7 @@ export default function NotFound() {
           <p className="lede">
             The link is broken or the route never shipped. Everything else is still switched on.
           </p>
-          <RequestLog />
+          <Terminal />
           <div className="glass">
             <Link href="/" aria-label="Back home" data-cursor="Home">
               cd ~
