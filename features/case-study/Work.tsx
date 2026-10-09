@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, ViewTransition } from "react";
 
 import type { Project } from "@/content/projects";
 import { ui } from "@/lib/store";
+
+import { MORPH, titleName } from "./transitions";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -32,7 +34,9 @@ export function Work({ projects }: { projects: Project[] }) {
           >
             <span className="mono muted">{pad(i + 1)}</span>
             <span>
-              <span className="t">{proj.name}</span>
+              <ViewTransition name={titleName(proj.slug)} share={MORPH} default="none">
+                <span className="t">{proj.name}</span>
+              </ViewTransition>
               {proj.badge && <span className="badge">{proj.badge}</span>}
             </span>
             <span className="s mono muted">
@@ -42,6 +46,7 @@ export function Work({ projects }: { projects: Project[] }) {
             <Link
               className="open"
               href={`/work/${proj.slug}`}
+              transitionTypes={["nav-forward"]}
               aria-label={`Open case study: ${proj.name}`}
               onClick={() => ui.setState({ lastCase: proj.slug })}
             />

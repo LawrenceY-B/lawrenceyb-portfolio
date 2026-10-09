@@ -667,6 +667,7 @@ section {
   outline-offset: -2px;
 }
 .row .t {
+  display: inline-block;
   font-weight: 800;
   font-size: var(--t-h3);
   letter-spacing: -0.04em;
@@ -1152,5 +1153,49 @@ footer .build a:hover {
 @media (prefers-reduced-motion: reduce) {
   .ticker-track {
     animation: none;
+  }
+}
+
+/* Page transitions (React <ViewTransition>, see features/case-study/transitions.ts).
+   The page crossfades while the particle canvas keeps running underneath; project titles
+   morph between the list, the case study heading and the previous/next links. */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(root) {
+  animation: 180ms ease-in both vt-fade reverse;
+}
+::view-transition-new(root) {
+  animation: 320ms ease-out 80ms both vt-fade;
+}
+::view-transition-group(.morph) {
+  animation-duration: 650ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+::view-transition-image-pair(.morph) {
+  animation-name: vt-blur;
+}
+::view-transition-old(.morph),
+::view-transition-new(.morph) {
+  height: 100%;
+  object-fit: fill;
+}
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vt-blur {
+  40% {
+    filter: blur(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
 }
