@@ -1,7 +1,7 @@
 import { gsap } from "gsap";
 import * as THREE from "three";
 
-import { on } from "@/lib/bus";
+import { watch } from "@/lib/store";
 
 import { fragmentShader, vertexShader } from "./shaders";
 
@@ -167,9 +167,9 @@ export function createParticles(
     },
   );
 
-  const offTheme = on("theme", theme);
+  const offTheme = watch("theme", theme);
   // Project hover: fade back to the card stack, then form the hovered project.
-  const offHover = on("project-hover", (shape) => {
+  const offHover = watch("hoveredShape", (shape) => {
     clearTimeout(hoverTimer);
     if (shape === null) {
       hoverOn = false;

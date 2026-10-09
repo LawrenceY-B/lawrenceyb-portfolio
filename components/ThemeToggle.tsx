@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { emit } from "@/lib/bus";
+import { ui } from "@/lib/store";
 import { resolvedTheme } from "@/lib/media";
 
 const STORAGE_KEY = "lyb-theme";
@@ -16,7 +16,7 @@ export function ThemeToggle() {
       const t = resolvedTheme();
       document.documentElement.classList.toggle("is-dark", t === "dark");
       setTheme(t);
-      emit("theme", t);
+      ui.setState({ theme: t });
     };
     sync();
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -34,7 +34,7 @@ export function ThemeToggle() {
       // Private mode: the choice lasts for this visit only.
     }
     setTheme(next);
-    emit("theme", next);
+    ui.setState({ theme: next });
   };
 
   return (
