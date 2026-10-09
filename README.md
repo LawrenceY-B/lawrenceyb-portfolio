@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# lawrenceyb-portfolio
 
-## Getting Started
+Portfolio of Lawrence Yirenkyi-Boafo: [lawrenceyb.vercel.app](https://lawrenceyb.vercel.app).
 
-First, run the development server:
+Next.js (App Router, static export), TypeScript, GSAP + ScrollTrigger, Lenis and a Three.js particle
+scene. The ticker reads live Ghana T-bill and GSE data from my
+[Treasury Bills API](https://github.com/LawrenceY-B/treasury-bills).
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+nvm use            # Node 22
+corepack enable    # pnpm from package.json#packageManager
+pnpm install
+cp .env.example .env.local
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script                     | What it does                                                      |
+| -------------------------- | ----------------------------------------------------------------- |
+| `pnpm dev`                 | Dev server with Strict Mode                                       |
+| `pnpm build`               | Static export to `out/`                                           |
+| `pnpm serve`               | Serve `out/` on :3000                                             |
+| `pnpm check`               | Typecheck, lint, format check and unit tests                      |
+| `pnpm test` / `test:watch` | Vitest unit tests (`tests/unit`)                                  |
+| `pnpm test:e2e`            | Playwright against the built `out/` (`tests/e2e`), incl. axe a11y |
+| `pnpm format`              | Prettier                                                          |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Locally you can run e2e tests with your installed Chrome: `PW_CHANNEL=chrome pnpm test:e2e`.
+Otherwise run `pnpm exec playwright install chromium` once.
 
-## Learn More
+## Environment
 
-To learn more about Next.js, take a look at the following resources:
+| Variable               | Default                                   | Used for                               |
+| ---------------------- | ----------------------------------------- | -------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL` | `https://lawrenceyb.vercel.app`           | Canonical, Open Graph, sitemap, robots |
+| `NEXT_PUBLIC_API_URL`  | `https://treasury-bills.onrender.com/api` | Market ticker                          |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Both are validated at build time in `lib/env.ts`. When a custom domain is added, set
+`NEXT_PUBLIC_SITE_URL` in Vercel and redeploy.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project layout
 
-## Deploy on Vercel
+```
+app/                 layout (metadata, fonts, boot script), page, manifest/robots/sitemap, OG images
+components/          static sections and small client components
+content/             projects, git log, stack, hobbies (edit copy here)
+features/
+  market/            API client (Zod-validated), cache, store, <Ticker />
+  case-study/        project list + modal sheet
+  motion/            GSAP/Lenis/text effects/preloader/cursor, started by <Experience />
+  particles/         Three.js scene, procedural shapes, shaders, head point data loader
+  inspect/           inspect mode (press I)
+lib/                 env, site config, typed event bus, browser helpers
+public/shapes.bin    head point cloud (50k points)
+tests/unit, tests/e2e
+docs/adr/            architecture decisions
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+See [ADR 0001](docs/adr/0001-imperative-motion-inside-react.md) for why animation code is imperative, and
+[docs/versioning.md](docs/versioning.md) for the release plan.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploying (Vercel)
+
+1. Push to GitHub (repo `lawrenceyb-portfolio`) and import it in Vercel. Name the Vercel project
+   `lawrenceyb` so the production URL stays `lawrenceyb.vercel.app`.
+2. Vercel picks up `vercel.json` (pnpm install, build, security headers).
+3. Add the site origin to the API's CORS list so the ticker can show **● Live**.
+4. Add `public/resume.pdf`, or the Résumé button 404s.
+
+The free Render API sleeps when idle. The ticker waits at most 7s, retries in the background and
+shows cached numbers on repeat visits.
+
+## Conventions
+
+- Branch from `main`, open a PR; CI must pass (typecheck, lint, format, unit, build, e2e, Lighthouse).
+- [Conventional Commits](https://www.conventionalcommits.org) (`feat:`, `fix:`, `chore:` …), enforced
+  by commitlint. Pre-commit runs ESLint and Prettier on staged files.
