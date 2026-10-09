@@ -11,6 +11,8 @@ export type UiState = {
   theme: "light" | "dark";
   /** Whether inspect mode is on. */
   inspect: boolean;
+  /** Phone tilt steers the particle cloud (touch devices; see components/TiltToggle.tsx). */
+  tilt: boolean;
   /** Particle shape a page holds (case studies, 404), or null to follow scroll (home). */
   sceneShape: number | null;
   /** Slug of the case study last opened from the project list; home scrolls back to its row. */
@@ -23,6 +25,7 @@ export const ui = createStore<UiState>()(() => ({
   inspect: false,
   lastCase: null,
   sceneShape: null,
+  tilt: false,
 }));
 
 /** Calls `fn` whenever `key` changes. Returns an unsubscribe. */

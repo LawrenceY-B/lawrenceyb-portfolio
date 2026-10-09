@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { TiltToggle } from "@/components/TiltToggle";
 import { SHAPE } from "@/content/projects";
 import { CaseExperience } from "@/features/motion/CaseExperience";
 import { Terminal } from "@/features/not-found/Terminal";
@@ -26,6 +27,7 @@ export default function NotFound() {
               cd ~
             </Link>
             <ThemeToggle />
+            <TiltToggle />
           </div>
         </div>
       </main>

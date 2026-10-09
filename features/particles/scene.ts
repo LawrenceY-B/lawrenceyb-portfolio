@@ -171,6 +171,25 @@ export function createParticles(
     },
   );
 
+  // Phone tilt: the same target as the pointer, from the motion sensor (store's `tilt`).
+  const onTilt = (e: DeviceOrientationEvent) => {
+    if (e.beta === null || e.gamma === null) return;
+    // Map to the screen's axes, so landscape tilts the way it looks.
+    const angle = screen.orientation?.angle ?? 0;
+    const side = angle === 90 ? e.beta : angle === 270 ? -e.beta : e.gamma;
+    const fwd = angle === 90 ? -e.gamma : angle === 270 ? e.gamma : e.beta;
+    const c = (v: number) => Math.max(-1, Math.min(1, v));
+    target.ry = c(side / 30) * 0.45;
+    // Phones are held at roughly 45°; tilt is relative to that.
+    target.rx = c((fwd - 45) / 30) * 0.18;
+  };
+  const setTilt = (on: boolean) => {
+    if (on && !reduce) window.addEventListener("deviceorientation", onTilt);
+    else window.removeEventListener("deviceorientation", onTilt);
+  };
+  setTilt(ui.getState().tilt);
+  const offTilt = watch("tilt", setTilt);
+
   const offTheme = watch("theme", theme);
   // Project hover: fade back to the card stack, then form the hovered project.
   const offHover = watch("hoveredShape", (shape) => {
@@ -278,6 +297,8 @@ export function createParticles(
       offTheme();
       offHover();
       offHold();
+      offTilt();
+      setTilt(false);
       if (held) gsap.killTweensOf(held.t);
       gsap.killTweensOf(U.uHover);
       gsap.killTweensOf(U.uAssemble);

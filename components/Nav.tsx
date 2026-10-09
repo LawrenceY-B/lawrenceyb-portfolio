@@ -2,6 +2,7 @@ import { InspectToggle } from "@/features/inspect/Inspect";
 import { Ticker } from "@/features/market/Ticker";
 
 import { ThemeToggle } from "./ThemeToggle";
+import { TiltToggle } from "./TiltToggle";
 
 export function TopBar() {
   return (
@@ -20,6 +21,7 @@ export function TopBar() {
           </a>
           <a href="#contact">Contact</a>
           <ThemeToggle />
+          <TiltToggle />
           <InspectToggle />
         </div>
       </nav>

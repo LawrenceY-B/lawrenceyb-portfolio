@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Fragment, ViewTransition } from "react";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { TiltToggle } from "@/components/TiltToggle";
 import { getProject, projects } from "@/content/projects";
 import { Back } from "@/features/case-study/Back";
 import { MORPH, titleName } from "@/features/case-study/transitions";
@@ -50,6 +51,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
             <div className="glass">
               <Back slug={p.slug} />
               <ThemeToggle />
+              <TiltToggle />
             </div>
             <span className="mono muted">
               {`// case study ${pad(index + 1)} / ${pad(projects.length)}`}
