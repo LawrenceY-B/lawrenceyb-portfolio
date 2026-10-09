@@ -1,4 +1,4 @@
-import { Cursor, Loader, ParticleCanvas } from "@/components/Chrome";
+import { Loader } from "@/components/Chrome";
 import { TopBar } from "@/components/Nav";
 import {
   About,
@@ -25,7 +25,6 @@ export default async function Home() {
   return (
     <>
       <Loader />
-      <ParticleCanvas />
       <TopBar />
       <main>
         <Hero />
@@ -39,7 +38,6 @@ export default async function Home() {
         <Footer year={year} />
       </main>
       <InspectOverlay />
-      <Cursor />
       <Experience />
     </>
   );

@@ -135,7 +135,7 @@ export function startCursor({ signal, cleanups, reduce }: MotionEnv): void {
  */
 export async function startParticles(
   { signal, cleanups, reduce }: MotionEnv,
-  opts: { scroll: () => ScrollInput; shape?: number },
+  opts: { scroll: () => ScrollInput | null },
 ): Promise<Particles | null> {
   const canvas = $<HTMLCanvasElement>("#gl");
   if (!canvas) return null;

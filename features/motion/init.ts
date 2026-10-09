@@ -4,17 +4,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { prefersReducedMotion } from "@/lib/media";
 import { ui } from "@/lib/store";
 import { marketReady } from "@/features/market/store";
-import type { Particles, ScrollInput } from "@/features/particles/scene";
+import type { ScrollInput } from "@/features/particles/scene";
 
-import {
-  $,
-  gather,
-  type MotionEnv,
-  startCursor,
-  startGlass,
-  startParticles,
-  startSmoothScroll,
-} from "./shared";
+import { $, type MotionEnv, startGlass, startSmoothScroll } from "./shared";
+import { gatherCloud, setScrollSource, whenParticles } from "./site";
 import { slotter } from "./slots";
 import { scramble, split } from "./text";
 
@@ -37,8 +30,8 @@ export function initExperience(): () => void {
   const env: MotionEnv = { signal, cleanups, reduce };
   // No js-loading means the preloader already ran this visit (e.g. back from a case study).
   const returning = !root.classList.contains("js-loading");
-  let particles: Particles | null = null;
   let introPlayed = false;
+  let gathered = false;
   let buildST: ScrollTrigger | null = null;
   let offST: ScrollTrigger | null = null;
 
@@ -141,13 +134,8 @@ export function initExperience(): () => void {
         { opacity: 0, y: 12, duration: 0.8, stagger: 0.08 },
         0.4,
       ).from(".top", { yPercent: -100, duration: 0.9, ease: "power3.out" }, 0.1);
-      if (particles)
-        tl.fromTo(
-          particles.assemble,
-          { value: 0 },
-          { value: 1, duration: 3, ease: "power2.inOut" },
-          0,
-        );
+      // The cloud is site-wide and must survive this page's teardown, so keep it out of `tl`.
+      gathered = gatherCloud();
     };
     const ready = marketReady();
     if (reduce || returning) {
@@ -218,7 +206,6 @@ export function initExperience(): () => void {
     }
 
     startGlass(env);
-    startCursor(env);
   });
 
   /* ---------- Particles ---------- */
@@ -252,11 +239,13 @@ export function initExperience(): () => void {
       po: offST ? offST.progress : 0,
     };
   };
-  void startParticles(env, { scroll: scrollInput }).then((p) => {
-    particles = p;
-    // Intro already ran (slow network, or back from a case study): gather the cloud now instead.
-    if (p && introPlayed && !reduce) gather(p);
-  });
+  setScrollSource(scrollInput);
+  cleanups.push(() => setScrollSource(null));
+  // Scene loaded after the preloader's intro started (slow network): gather it now instead.
+  if (!reduce && !returning)
+    void whenParticles().then((p) => {
+      if (introPlayed && !gathered && !signal.aborted) gatherCloud(p);
+    });
 
   /* ---------- Back from a case study: land on its row ---------- */
   if (reduce || returning) {
@@ -280,7 +269,6 @@ export function initExperience(): () => void {
   return () => {
     ac.abort();
     cleanups.forEach((fn) => fn());
-    particles = null;
     ctx.revert();
   };
 }

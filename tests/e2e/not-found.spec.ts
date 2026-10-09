@@ -14,6 +14,23 @@ test("unknown routes get the 404 page with the requested path", async ({ page, e
   expect(errors.filter((e) => !e.includes("status of 404"))).toEqual([]);
 });
 
+test("the 404 terminal runs commands and cd ~ goes home", async ({ page }) => {
+  await page.goto("/no-such-page");
+  // Typing anywhere focuses the prompt.
+  await page.keyboard.type("help");
+  await expect(page.getByRole("textbox", { name: "Terminal command" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".term")).toContainText("sudo fix");
+  await page.keyboard.type("nope");
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".term")).toContainText("command not found: nope");
+  await page.keyboard.press("ArrowUp");
+  await expect(page.getByRole("textbox", { name: "Terminal command" })).toHaveValue("nope");
+  await page.getByRole("textbox", { name: "Terminal command" }).fill("cd ~");
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/$/);
+});
+
 test("404 page has no serious accessibility violations", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/no-such-page");
