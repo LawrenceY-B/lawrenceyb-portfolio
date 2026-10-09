@@ -602,8 +602,9 @@ export function buildShapes(N: number, rand: () => number): Record<ShapeName, Fl
     );
     out.book = sample(parts, { view: R(-0.6, 0.2, 0.04), w: 2.7, h: 1.9 });
   }
-  // 15. 404: a broken light bulb. Smooth glass with a jagged hole knocked out of its right-hand
-  // edge, a few shards just outside it, a snapped filament and a threaded base.
+  // 15. 404: a smashed light bulb. Glass with a big jagged hole and a chip knocked out of its
+  // outline, cracks running across the front, shards flying off and lying below, a snapped
+  // filament and a threaded base. Leans a little, as if knocked over.
   {
     const profile = new THREE.SplineCurve(
       (
@@ -620,29 +621,43 @@ export function buildShapes(N: number, rand: () => number): Record<ShapeName, Fl
         ] as const
       ).map(([x, y]) => new THREE.Vector2(x, y)),
     ).getPoints(72);
-    const full = new THREE.LatheGeometry(profile, 120).toNonIndexed();
-    // Lathe angle 0 faces the camera and the glass is see-through, so the hole goes on the
-    // right-hand silhouette (angle π/2), where it reads as a bite out of the outline.
+    /** Point on the glass at height y and lathe angle a (0 faces the camera). */
+    const onGlass = (y: number, a: number): Vec3 => {
+      let k = 1;
+      while (k < profile.length - 1 && profile[k]!.y < y) k++;
+      const p0 = profile[k - 1]!;
+      const p1 = profile[k]!;
+      const r = p0.x + ((p1.x - p0.x) * (y - p0.y)) / (p1.y - p0.y || 1);
+      return [r * Math.sin(a) * 1.004, y, r * Math.cos(a) * 1.004];
+    };
+    /** Signed angle from a to b, wrapped to [-π, π]. */
+    const dAng = (a: number, b: number) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
+    /** Jagged edge: a few sines at odd frequencies read as broken glass. */
+    const jag = (y: number, s: number) =>
+      0.22 * Math.sin(y * 29 + s) + 0.14 * Math.sin(y * 71 + s * 2) + 0.08 * Math.sin(y * 151);
+
+    const full = new THREE.LatheGeometry(profile, 140).toNonIndexed();
     const src = full.attributes.position!.array as ArrayLike<number>;
     const kept: number[] = [];
     for (let i = 0; i < src.length; i += 9) {
       const cx = (src[i]! + src[i + 3]! + src[i + 6]!) / 3;
       const cy = (src[i + 1]! + src[i + 4]! + src[i + 7]!) / 3;
       const cz = (src[i + 2]! + src[i + 5]! + src[i + 8]!) / 3;
-      const t = (cy - 0.32) / 0.78;
-      if (t > 0 && t < 1) {
-        const off = Math.abs(Math.atan2(cx, cz) - Math.PI / 2);
-        // Jagged crack: a lens-shaped hole whose edge zig-zags with height.
-        const edge =
-          Math.sin(Math.PI * t) * (0.62 + 0.2 * Math.sin(cy * 31) + 0.12 * Math.sin(cy * 73 + 1));
-        if (off < edge) continue;
-      }
+      const a = Math.atan2(cx, cz);
+      // The big hole, centred on the right-hand silhouette and reaching over the top.
+      const t = (cy - 0.08) / 1.14;
+      if (t > 0 && t < 1 && Math.abs(dAng(a, 1.25)) < Math.sin(Math.PI * t) * (1.05 + jag(cy, 0)))
+        continue;
+      // A smaller chip out of the upper left edge.
+      const u = (cy - 0.72) / 0.32;
+      if (u > 0 && u < 1 && Math.abs(dAng(a, -1.6)) < Math.sin(Math.PI * u) * (0.42 + jag(cy, 3)))
+        continue;
       // Glass reads at its edges: keep faces seen side-on (the outline) and a sparse fill.
       const ux = src[i + 3]! - src[i]!;
       const uy = src[i + 4]! - src[i + 1]!;
+      const uz = src[i + 5]! - src[i + 2]!;
       const vx = src[i + 6]! - src[i]!;
       const vy = src[i + 7]! - src[i + 1]!;
-      const uz = src[i + 5]! - src[i + 2]!;
       const vz = src[i + 8]! - src[i + 2]!;
       const nz = ux * vy - uy * vx;
       const nl = Math.hypot(uy * vz - uz * vy, uz * vx - ux * vz, nz) || 1;
@@ -653,43 +668,75 @@ export function buildShapes(N: number, rand: () => number): Record<ShapeName, Fl
     glass.setAttribute("position", new THREE.Float32BufferAttribute(kept, 3));
     full.dispose();
 
+    // Cracks: zig-zag lines on the glass running from the hole across the front.
+    const crack = (y0: number, a0: number, steps: number, dy: number, da: number, s: number) =>
+      tube(
+        Array.from({ length: steps }, (_, k) =>
+          onGlass(
+            y0 + dy * k + 0.035 * Math.sin(k * 2.3 + s),
+            a0 + da * k + 0.06 * Math.sin(k * 3.7 + s),
+          ),
+        ),
+        0.006,
+      );
+    const cracks = [
+      crack(0.62, 0.55, 9, 0.02, -0.16, 0),
+      crack(0.86, 0.5, 8, 0.03, -0.17, 1),
+      crack(0.36, 0.6, 8, -0.035, -0.14, 2),
+      crack(0.7, -0.15, 5, 0.06, -0.09, 3),
+      crack(0.98, -0.6, 4, -0.05, -0.14, 4),
+    ];
+
     const parts: Part[] = [
       { g: glass, c: 0, w: 1.6, ds: true },
-      // Filament supports.
-      ...[-1, 1].map((k) => ({
+      ...cracks.map((g) => ({ g, c: 0, w: 7 })),
+      // Filament supports, one bent by the impact.
+      {
         g: tube(
           [
-            [k * 0.08, -0.36, 0],
-            [k * 0.1, 0.05, 0],
-            [k * 0.2, 0.45, 0],
+            [-0.08, -0.36, 0],
+            [-0.1, 0.05, 0],
+            [-0.2, 0.45, 0],
           ],
           0.014,
         ),
         c: 0,
         w: 4,
-      })),
-      // Left half of the filament, still glowing, ending in a snapped tip.
+      },
+      {
+        g: tube(
+          [
+            [0.08, -0.36, 0],
+            [0.12, 0.0, 0.02],
+            [0.24, 0.3, 0.05],
+            [0.3, 0.42, 0.04],
+          ],
+          0.014,
+        ),
+        c: 0,
+        w: 4,
+      },
+      // What's left of the filament: a stub still glowing, the rest drooping off the bent wire.
       {
         g: tube(
           [
             [-0.2, 0.45, 0],
-            [-0.14, 0.6, 0.02],
-            [-0.05, 0.64, 0.03],
-            [0.01, 0.58, 0.03],
+            [-0.15, 0.58, 0.02],
+            [-0.07, 0.6, 0.03],
+            [-0.04, 0.52, 0.04],
           ],
           0.02,
         ),
         c: 2,
         w: 10,
       },
-      // The other half, hanging off the right support.
       {
         g: tube(
           [
-            [0.2, 0.45, 0],
-            [0.2, 0.32, 0.04],
-            [0.15, 0.2, 0.07],
-            [0.11, 0.14, 0.07],
+            [0.3, 0.42, 0.04],
+            [0.31, 0.26, 0.07],
+            [0.25, 0.1, 0.1],
+            [0.18, 0.02, 0.09],
           ],
           0.02,
         ),
@@ -705,30 +752,33 @@ export function buildShapes(N: number, rand: () => number): Record<ShapeName, Fl
       })),
       { g: cyl(0.2, 0.1, 0.1, 32), m: T(0, -1.01, 0), c: 0, w: 1.2 },
     ];
-    // Shards that just broke off, still close to the hole.
+    // Shards: [x, y, z, spin, size]. Flying out of the hole, falling, and lying below.
     const shards: [number, number, number, number, number][] = [
-      [0.9, 0.86, 0.12, 0.5, 0.12],
-      [1.03, 1.02, 0.02, 1.9, 0.09],
-      [0.97, 0.62, 0.16, 3.1, 0.07],
+      [0.86, 0.95, 0.15, 0.5, 0.16],
+      [1.05, 1.18, 0.05, 1.9, 0.12],
+      [1.2, 0.86, 0.1, 3.1, 0.1],
+      [0.98, 0.58, 0.2, 4.2, 0.09],
+      [1.32, 1.08, -0.05, 5.3, 0.07],
+      [1.12, 1.38, 0.0, 2.4, 0.06],
+      [1.05, 0.12, 0.12, 0.9, 0.08],
+      [-0.85, 0.98, 0.1, 2.0, 0.07],
+      [0.55, -1.08, 0.2, 0, 0.14],
+      [0.85, -1.1, -0.1, 0, 0.1],
+      [-0.5, -1.1, 0.25, 0, 0.11],
+      [1.15, -1.09, 0.15, 0, 0.07],
     ];
-    shards.forEach(([x, y, z, r, size]) =>
-      parts.push({
-        g: ext(
-          poly([
-            [0, 0],
-            [size, size * 0.25],
-            [size * 0.3, size * 0.9],
-          ]),
-          0.006,
-          0,
-        ),
-        m: C(T(x, y, z), R(r, r * 0.7, r * 1.3)),
-        c: 0,
-        w: 3,
-        ds: true,
-      }),
-    );
-    out.bulb = sample(parts, { view: R(0.08, -0.15, 0.06), w: 1.9, h: 1.95 });
+    shards.forEach(([x, y, z, r, size]) => {
+      const tri = poly([
+        [0, 0],
+        [size, size * 0.2],
+        [size * 0.65, size * 0.55],
+        [size * 0.25, size * 0.95],
+      ]);
+      // Shards on the floor lie flat; the rest tumble.
+      const rot = r === 0 ? R(-Math.PI / 2 + 0.25, x * 2, 0) : R(r, r * 0.7, r * 1.3);
+      parts.push({ g: ext(tri, 0.006, 0), m: C(T(x, y, z), rot), c: 0, w: 3, ds: true });
+    });
+    out.bulb = sample(parts, { view: R(0.1, -0.15, -0.14), w: 2.3, h: 2.05 });
   }
   return out;
 }
