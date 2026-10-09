@@ -13,17 +13,16 @@ export const vertexShader = /* glsl */ `
   vec3 anim(vec4 s, float id){
     vec3 p = s.xyz;
     if (abs(id - 12.) < .5 && aRnd.w > .9) { p.x -= aRnd.z * 1.2 * uSpeed; }
-    if (abs(id - 15.) < .5) { float h = fract(sin(floor(p.x * 30.) * 12.9898) * 43758.5); p.y += .16 * sin(uTime * 1.2 + h * 6.28) * uMotion; }
     if (abs(id - 3.) < .5 || abs(id - 1.) < .5 || abs(id - 2.) < .5) { float a = sin(uTime * .5) * .18 * uMotion; p = vec3(p.x * cos(a) + p.z * sin(a), p.y, -p.x * sin(a) + p.z * cos(a)); }
     return p;
   }
   vec3 col(float w){ float c = floor(w + 1e-4); return c < .5 ? uInk : (c < 1.5 ? uRed : uYel); }
   float bri(float w, float id){
     float b = fract(w) / .9;
-    if (abs(id - 15.) < .5) {
-      float h = fract(sin(floor(position.x * 0. + aRnd.w * 42.) * 12.9898) * 43758.5);
-      float sweep = exp(-pow(fract(aRnd.y * .6 - uTime * .35 * uMotion + h) - .5, 2.) * 26.);
-      b = clamp(b * (.45 + 1.1 * sweep), 0., 1.);
+    // 15 bulb (404): the broken filament (red/yellow points) flickers.
+    if (abs(id - 15.) < .5 && w > .99) {
+      float on = step(.3, fract(sin(floor(uTime * 9.) * 78.233) * 43758.5));
+      b *= mix(1., mix(.2, 1., on), uMotion);
     }
     return b;
   }
