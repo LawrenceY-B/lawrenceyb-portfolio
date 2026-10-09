@@ -35,7 +35,7 @@ jobs:
       - run: pnpm test:e2e
       - name: Lighthouse budgets
         run: pnpm dlx @lhci/cli@0.15.1 autorun
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: playwright-report
