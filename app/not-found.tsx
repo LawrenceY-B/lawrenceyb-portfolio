@@ -27,9 +27,6 @@ export default function NotFound() {
             <Link href="/" aria-label="Back home" data-cursor="Home">
               cd ~
             </Link>
-            <Link href="/#work" aria-label="See work" data-cursor="Work">
-              ls ./work
-            </Link>
             <ThemeToggle />
           </div>
         </div>

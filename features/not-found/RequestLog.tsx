@@ -2,8 +2,6 @@
 
 import { useSyncExternalStore } from "react";
 
-import { projects } from "@/content/projects";
-
 const noop = () => () => {};
 /** The requested path. 404.html is built once, so it is only known in the browser. */
 const usePath = () =>
@@ -24,7 +22,7 @@ export function RequestLog() {
       {"\n"}
       <span className="muted">x-reason: no route matches this path</span>
       {"\n"}
-      <span className="muted">x-hint: </span>/ · /#work · /work/{projects[0]!.slug}
+      <span className="muted">x-hint: </span>try / instead
       {"\n"}
       <span className="muted">$ </span>
       <span className="caret" aria-hidden="true" />
