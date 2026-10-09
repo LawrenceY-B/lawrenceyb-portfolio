@@ -2,7 +2,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 
-import { on } from "@/lib/bus";
+import { watch } from "@/lib/store";
 import { hasFinePointer, prefersReducedMotion } from "@/lib/media";
 import { marketReady } from "@/features/market/store";
 import { loadHead } from "@/features/particles/data";
@@ -65,7 +65,7 @@ export function initExperience(): () => void {
       },
       { signal },
     );
-    cleanups.push(on("sheet-open", (open) => (open ? lenis?.stop() : lenis?.start())));
+    cleanups.push(watch("sheetOpen", (open) => (open ? lenis?.stop() : lenis?.start())));
 
     /* ---------- Pinned slots ---------- */
     const build = $("#build");

@@ -53,7 +53,7 @@ features/
   motion/            GSAP/Lenis/text effects/preloader/cursor, started by <Experience />
   particles/         Three.js scene, procedural shapes, shaders, head point data loader
   inspect/           inspect mode (press I)
-lib/                 env, site config, typed event bus, browser helpers
+lib/                 env, site config, UI store (Zustand), browser helpers
 public/shapes.bin    head point cloud (50k points)
 tests/unit, tests/e2e
 docs/adr/            architecture decisions

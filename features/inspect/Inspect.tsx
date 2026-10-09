@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useStore } from "zustand";
 
-import { emit, on as onBus } from "@/lib/bus";
+import { ui, watch } from "@/lib/store";
+
+const toggleInspect = () => ui.setState((s) => ({ inspect: !s.inspect }));
 
 /** Toggle button for inspect mode (also bound to the I key). Draws labelled boxes over every [data-inspect] element. */
 export function InspectToggle() {
-  const [on, setOn] = useState(false);
+  const on = useStore(ui, (s) => s.inspect);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -18,7 +21,7 @@ export function InspectToggle() {
         !e.altKey &&
         !/INPUT|TEXTAREA|SELECT/.test(tag)
       )
-        setOn((v) => !v);
+        toggleInspect();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -26,7 +29,6 @@ export function InspectToggle() {
 
   useEffect(() => {
     document.documentElement.dataset.inspect = on ? "on" : "off";
-    emit("inspect", on);
   }, [on]);
 
   return (
@@ -37,7 +39,7 @@ export function InspectToggle() {
       aria-pressed={on}
       aria-label="Toggle inspect mode"
       title="Inspect (I)"
-      onClick={() => setOn((v) => !v)}
+      onClick={toggleInspect}
     >
       <svg
         viewBox="0 0 24 24"
@@ -85,7 +87,7 @@ export function InspectOverlay() {
       host.replaceChildren(frag);
       raf = requestAnimationFrame(draw);
     };
-    const off = onBus("inspect", (active) => {
+    const off = watch("inspect", (active) => {
       cancelAnimationFrame(raf);
       if (active) raf = requestAnimationFrame(draw);
       else boxes.current?.replaceChildren();

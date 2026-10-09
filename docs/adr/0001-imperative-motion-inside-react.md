@@ -19,7 +19,7 @@ animation frame and risk visual regressions in a design that already works.
   `features/particles`, started once by `<Experience />` in a `useEffect` and torn down by the
   cleanup it returns (`gsap.context().revert()`, an `AbortController` for listeners,
   `lenis.destroy()`, renderer/geometry disposal). This keeps React Strict Mode's double mount safe.
-- The two sides talk only through the typed event bus in `lib/bus.ts`.
+- The two sides talk only through the Zustand vanilla store in `lib/store.ts` (`ui.setState` to write, `watch(key, fn)` or `useStore` to read).
 - Three.js and the particle data load after first paint via dynamic `import()` and `fetch`.
 
 ## Consequences

@@ -13,7 +13,7 @@ import {
 import { createPortal } from "react-dom";
 
 import type { Project } from "@/content/projects";
-import { emit } from "@/lib/bus";
+import { ui } from "@/lib/store";
 import { prefersReducedMotion } from "@/lib/media";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -53,7 +53,7 @@ export function Work({ projects }: { projects: Project[] }) {
     el.scrollTop = 0;
     el.classList.add("open");
     setBackgroundInert(true);
-    emit("sheet-open", true);
+    ui.setState({ sheetOpen: true });
     const ctx = gsap.context(() => {
       gsap.fromTo(
         el,
@@ -85,7 +85,7 @@ export function Work({ projects }: { projects: Project[] }) {
         closing.current = false;
         el.classList.remove("open");
         setBackgroundInert(false);
-        emit("sheet-open", false);
+        ui.setState({ sheetOpen: false });
         setOpen(false);
         lastFocus.current?.focus({ preventScroll: true });
       },
@@ -110,8 +110,8 @@ export function Work({ projects }: { projects: Project[] }) {
     <>
       <ul className="rows">
         {projects.map((proj, i) => {
-          const hover = () => emit("project-hover", proj.shape);
-          const leave = () => emit("project-hover", null);
+          const hover = () => ui.setState({ hoveredShape: proj.shape });
+          const leave = () => ui.setState({ hoveredShape: null });
           return (
             <li
               key={proj.name}
