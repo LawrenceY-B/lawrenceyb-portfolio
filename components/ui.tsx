@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-/** "// label" heading row used at the top of most sections. */
 export function SecHead({
   label,
   aside,

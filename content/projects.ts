@@ -5,7 +5,6 @@ export type Link = { label: string; href: string };
 export type Fact = { label: string; value: string } | { label: string; links: Link[] };
 
 export type Project = {
-  /** URL segment: /work/<slug>. */
   slug: string;
   shape: number;
   name: string;

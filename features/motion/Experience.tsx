@@ -4,7 +4,6 @@ import { useEffect } from "react";
 
 import { initExperience } from "./init";
 
-/** Mounts all imperative page effects once the static markup has hydrated. */
 export function Experience() {
   useEffect(() => {
     try {

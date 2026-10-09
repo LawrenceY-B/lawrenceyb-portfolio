@@ -10,7 +10,6 @@ import { MORPH, titleName } from "./transitions";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-/** Project rows. Hovering one forms its particle shape; clicking opens /work/<slug>. */
 export function Work({ projects }: { projects: Project[] }) {
   // Leaving via a row never fires pointerleave; clear it so the same row can form its shape again.
   useEffect(() => () => ui.setState({ hoveredShape: null }), []);

@@ -10,7 +10,6 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = { title: `404 · ${site.shortName}` };
 
-/** 404 (out/404.html): a broken light bulb in particles, with the case pages' motion layer. */
 export default function NotFound() {
   return (
     <>

@@ -1194,9 +1194,7 @@ footer .build a:hover {
   }
 }
 
-/* Page transitions (React <ViewTransition>, see features/case-study/transitions.ts).
-   The page crossfades while the particle canvas keeps running underneath; project titles
-   morph between the list, the case study heading and the previous/next links. */
+/* Page transitions (see features/case-study/transitions.ts) */
 ::view-transition {
   pointer-events: none;
 }

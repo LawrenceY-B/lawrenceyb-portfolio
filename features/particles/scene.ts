@@ -19,7 +19,6 @@ const CAR_SHAPE = 12;
 export type ScrollInput = { seg: number; po: number };
 
 export type Particles = {
-  /** Intro "gather" progress, 0 → 1. Tween `.value`. */
   assemble: { value: number };
   dispose: () => void;
 };
@@ -171,7 +170,6 @@ export function createParticles(
     },
   );
 
-  // Phone tilt: the same target as the pointer, from the motion sensor (store's `tilt`).
   const onTilt = (e: DeviceOrientationEvent) => {
     if (e.beta === null || e.gamma === null) return;
     // Map to the screen's axes, so landscape tilts the way it looks.
@@ -208,7 +206,7 @@ export function createParticles(
     }
   });
 
-  // Held shape: morph from whatever is on screen to the page's shape. `t` tweens 0 → 1.
+  // Held shape: morph from whatever is on screen to the page's shape.
   let held: { from: number; to: number; t: { value: number } } | null = null;
   let shown = 0;
   const hold = (shape: number | null) => {

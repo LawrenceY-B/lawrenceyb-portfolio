@@ -49,7 +49,6 @@ export function startSmoothScroll({ signal, cleanups, reduce }: MotionEnv): Leni
   return lenis;
 }
 
-/** Glass: shine follows the pointer, blob tracks nav items. */
 export function startGlass({ signal, reduce }: MotionEnv): void {
   document.addEventListener(
     "pointermove",
@@ -87,7 +86,7 @@ export function startGlass({ signal, reduce }: MotionEnv): void {
   }
 }
 
-/** Custom cursor; any element with data-cursor="Label" shows that label while hovered. */
+/** Any element with data-cursor="Label" shows that label on the cursor while hovered. */
 export function startCursor({ signal, cleanups, reduce }: MotionEnv): void {
   const me = $("#me");
   const meName = $("#meName");
@@ -128,11 +127,7 @@ export function startCursor({ signal, cleanups, reduce }: MotionEnv): void {
   );
 }
 
-/**
- * Particle scene on #gl. Three.js is code-split and loaded after first paint, while the point
- * data is fetched and prepared in a worker. Resolves to null if there is no canvas, the page
- * was torn down first, or loading failed (the canvas is then hidden).
- */
+/** Resolves to null if there is no canvas, the page was torn down, or loading failed (the canvas is then hidden). */
 export async function startParticles(
   { signal, cleanups, reduce }: MotionEnv,
   opts: { scroll: () => ScrollInput | null },
@@ -160,7 +155,6 @@ export async function startParticles(
   }
 }
 
-/** Gathers the particle cloud in from scattered, as the intro does. */
 export function gather(particles: Particles): void {
   gsap.fromTo(particles.assemble, { value: 0 }, { value: 1, duration: 3, ease: "power2.inOut" });
 }
