@@ -5,6 +5,8 @@ export type Link = { label: string; href: string };
 export type Fact = { label: string; value: string } | { label: string; links: Link[] };
 
 export type Project = {
+  /** URL segment: /work/<slug>. */
+  slug: string;
   shape: number;
   name: string;
   badge?: string;
@@ -18,6 +20,7 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    slug: "trade-sim",
     shape: SHAPE.phone,
     name: "Trade Sim",
     badge: "In progress",
@@ -46,6 +49,7 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: "treasury-bills-api",
     shape: SHAPE.percent,
     name: "Treasury Bills API",
     year: "2026",
@@ -86,6 +90,7 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: "friendwave",
     shape: SHAPE.bubbles,
     name: "Friendwave",
     year: "2023",
@@ -109,6 +114,7 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: "edusearch",
     shape: SHAPE.cap,
     name: "EduSearch",
     year: "2022",
@@ -135,3 +141,8 @@ export const projects: Project[] = [
     ],
   },
 ];
+
+export function getProject(slug: string): { project: Project; index: number } | undefined {
+  const project = projects.find((p) => p.slug === slug);
+  return project && { project, index: projects.indexOf(project) };
+}

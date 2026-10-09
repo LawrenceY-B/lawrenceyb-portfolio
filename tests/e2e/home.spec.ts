@@ -22,6 +22,21 @@ test.describe("with motion", () => {
       "● Offline",
     );
   });
+
+  test("returning from a case study skips the preloader and can scroll", async ({ page }) => {
+    await mockMarket(page);
+    await page.goto("/");
+    await expect(page.locator("html")).not.toHaveClass(/js-loading/, { timeout: 15_000 });
+    await page.getByRole("link", { name: "Open case study: Trade Sim" }).click();
+    await expect(page).toHaveURL(/\/work\/trade-sim\/?$/);
+    await page.getByRole("link", { name: "← All work" }).click();
+    await expect(page).toHaveURL(/\/#work$/);
+    await expect(page.locator("#loader")).toBeHidden();
+    const before = await page.evaluate(() => window.scrollY);
+    await page.mouse.move(400, 300);
+    await page.mouse.wheel(0, 600);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).not.toBe(before);
+  });
 });
 
 test.describe("reduced motion", () => {
@@ -37,31 +52,23 @@ test.describe("reduced motion", () => {
     expect(errors).toEqual([]);
   });
 
-  test("case study opens as a modal, traps focus, closes on Escape", async ({ page }) => {
+  test("project rows open case study pages", async ({ page }) => {
     await mockMarket(page);
     await page.goto("/");
-    const opener = page.getByRole("button", { name: "Open case study: Treasury Bills API" });
-    await opener.click();
-    const dialog = page.getByRole("dialog", { name: "Treasury Bills API" });
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole("button", { name: /Close/ })).toBeFocused();
-    await expect(dialog.getByRole("link", { name: "API docs ↗" })).toHaveAttribute(
-      "rel",
-      /noopener/,
-    );
-    // Background is inert, so Tab cycles only through the sheet.
-    for (let i = 0; i < 5; i++) {
-      await page.keyboard.press("Tab");
-      expect(
-        await page.evaluate(
-          () =>
-            !!document.activeElement?.closest("#sheet") || document.activeElement === document.body,
-        ),
-      ).toBe(true);
-    }
-    await page.keyboard.press("Escape");
-    await expect(dialog).toBeHidden();
-    await expect(opener).toBeFocused();
+    await page.getByRole("link", { name: "Open case study: Treasury Bills API" }).click();
+    await expect(page).toHaveURL(/\/work\/treasury-bills-api\/?$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Treasury Bills API" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "API docs ↗" })).toHaveAttribute("rel", /noopener/);
+    await page.getByRole("link", { name: "← All work" }).click();
+    await expect(page).toHaveURL(/\/#work$/);
+    await expect(page.locator("#work")).toBeVisible();
+  });
+
+  test("case study pages load directly", async ({ page }) => {
+    await page.goto("/work/trade-sim");
+    await expect(page.getByRole("heading", { level: 1, name: "Trade Sim" })).toBeVisible();
+    await page.getByRole("link", { name: /Next →/ }).click();
+    await expect(page).toHaveURL(/\/work\/treasury-bills-api\/?$/);
   });
 
   test("theme toggle persists across reloads", async ({ page }) => {

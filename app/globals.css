@@ -653,13 +653,13 @@ section {
   position: relative;
   transition: opacity 0.35s;
 }
-.row button.open {
+.row .open {
   all: unset;
   position: absolute;
   inset: 0;
   cursor: pointer;
 }
-.row button.open:focus-visible {
+.row .open:focus-visible {
   outline: 2px solid var(--red);
   outline-offset: -2px;
 }
@@ -907,39 +907,26 @@ footer .build a:hover {
   text-decoration: underline;
 }
 
-/* Case study sheet */
-#sheet {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  background: var(--surface);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  clip-path: inset(100% 0 0 0);
-  visibility: hidden;
-}
-#sheet.open {
-  visibility: visible;
-}
-.sheet-in {
+/* Case study page */
+.case-in {
   max-width: 980px;
   margin: 0 auto;
   padding: calc(env(safe-area-inset-top, 0px) + 28px) var(--gutter) 80px;
 }
-.sheet-top {
+.case-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
 }
-#sheet h2 {
+.case h1 {
   font-weight: 800;
   font-size: clamp(48px, 9vw, 120px);
   letter-spacing: -0.055em;
   line-height: 0.9;
   margin: 48px 0 18px;
 }
-#sheet .lede {
+.case .lede {
   font-size: var(--t-lead);
   max-width: 60ch;
   margin: 0 0 40px;
@@ -968,6 +955,28 @@ footer .build a:hover {
 .chapters p {
   margin: 0;
   max-width: 62ch;
+}
+.case-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 64px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.case-nav a {
+  display: grid;
+  gap: 6px;
+  font-weight: 800;
+  font-size: var(--t-h3);
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+.case-nav a[rel="next"] {
+  text-align: right;
+}
+.case-nav a:hover {
+  color: var(--red);
 }
 
 /* Inspect overlay */

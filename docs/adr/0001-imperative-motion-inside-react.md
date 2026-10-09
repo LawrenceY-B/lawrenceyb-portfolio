@@ -13,7 +13,9 @@ animation frame and risk visual regressions in a design that already works.
 ## Decision
 
 - Markup is server-rendered (static export) from typed content in `content/`.
-- UI with real state (ticker, case-study sheet, theme, inspect mode, copy-email, deploy button) are
+- Case studies are their own statically exported routes (`app/work/[slug]`) with native scroll and
+  none of the motion layer, rather than an overlay on the home page.
+- UI with real state (ticker, theme, inspect mode, copy-email, deploy button) are
   React client components.
 - Everything frame-driven lives in plain TypeScript modules under `features/motion` and
   `features/particles`, started once by `<Experience />` in a `useEffect` and torn down by the
