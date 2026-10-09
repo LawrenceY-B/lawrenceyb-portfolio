@@ -602,9 +602,7 @@ export function buildShapes(N: number, rand: () => number): Record<ShapeName, Fl
     );
     out.book = sample(parts, { view: R(-0.6, 0.2, 0.04), w: 2.7, h: 1.9 });
   }
-  // 15. 404: a smashed light bulb. Glass with a big jagged hole and a chip knocked out of its
-  // outline, cracks running across the front, shards flying off and lying below, a snapped
-  // filament and a threaded base. Leans a little, as if knocked over.
+  // 15. 404: a smashed light bulb
   {
     const profile = new THREE.SplineCurve(
       (

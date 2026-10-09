@@ -7,7 +7,6 @@ import { ui, watch } from "@/lib/store";
 
 const toggleInspect = () => ui.setState((s) => ({ inspect: !s.inspect }));
 
-/** Toggle button for inspect mode (also bound to the I key). Draws labelled boxes over every [data-inspect] element. */
 export function InspectToggle() {
   const on = useStore(ui, (s) => s.inspect);
 
@@ -56,7 +55,6 @@ export function InspectToggle() {
   );
 }
 
-/** Overlay that follows [data-inspect] elements every frame while inspect mode is on. */
 export function InspectOverlay() {
   const boxes = useRef<HTMLDivElement>(null);
 

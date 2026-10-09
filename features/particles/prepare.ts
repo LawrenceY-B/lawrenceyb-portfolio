@@ -6,7 +6,6 @@ export const TW = 256;
 export const BH = Math.ceil(N / TW);
 export const TH = BH * ORDER.length;
 
-/** Everything the GPU needs, as transferable typed arrays. */
 type F32 = Float32Array<ArrayBuffer>;
 export type Prepared = {
   head: F32;

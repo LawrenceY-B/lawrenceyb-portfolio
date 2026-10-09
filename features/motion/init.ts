@@ -16,11 +16,7 @@ const $$ = <T extends Element = HTMLElement>(s: string) =>
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 const smooth = (v: number) => v * v * (3 - 2 * v);
 
-/**
- * Wires up every imperative effect on the page: smooth scroll, pinned slot sections, text
- * effects, the preloader and intro, glass highlights, the custom cursor and the particle scene.
- * Returns a cleanup that reverts all of it (React Strict Mode mounts effects twice in dev).
- */
+/** Home page effects. The cleanup reverts everything (Strict Mode mounts effects twice in dev). */
 export function initExperience(): () => void {
   const root = document.documentElement;
   const reduce = prefersReducedMotion();
@@ -38,7 +34,6 @@ export function initExperience(): () => void {
   const lenis = startSmoothScroll(env);
 
   const ctx = gsap.context(() => {
-    /* ---------- Pinned slots ---------- */
     const build = $("#build");
     if (!reduce && build) {
       // Look these up once: ScrollTrigger can still fire while the page is torn down.
@@ -77,7 +72,6 @@ export function initExperience(): () => void {
       });
     }
 
-    /* ---------- Text effects ---------- */
     const heroLines = reduce ? [] : $$('[data-fx="hero"]').map((el) => split(el).chars);
     if (!reduce) {
       $$('[data-fx="words"]').forEach((el) => {
@@ -122,7 +116,6 @@ export function initExperience(): () => void {
       });
     }
 
-    /* ---------- Preloader + intro ---------- */
     const intro = () => {
       introPlayed = true;
       const tl = gsap.timeline();
@@ -159,7 +152,6 @@ export function initExperience(): () => void {
         rail.style.transform = `scaleX(${o.v / 100})`;
       };
       lenis?.stop();
-      // Stage 1: at least 3 seconds, revealing the log up to the API calls.
       gsap.to(o, {
         v: 90,
         duration: 3,
@@ -173,7 +165,6 @@ export function initExperience(): () => void {
         onComplete: () =>
           void ready.then((res) => {
             if (signal.aborted) return;
-            // Stage 2: report what actually came back, then finish.
             const k = res.ok;
             const d = res.data;
             log.textContent = lines
@@ -208,7 +199,6 @@ export function initExperience(): () => void {
     startGlass(env);
   });
 
-  /* ---------- Particles ---------- */
   const rect = (id: string) => document.getElementById(id)?.getBoundingClientRect();
   const enter = (id: string) => {
     const vh = window.innerHeight;
@@ -247,7 +237,6 @@ export function initExperience(): () => void {
       if (introPlayed && !gathered && !signal.aborted) gatherCloud(p);
     });
 
-  /* ---------- Back from a case study: land on its row ---------- */
   if (reduce || returning) {
     const { lastCase } = ui.getState();
     const id = location.hash.startsWith("#work-")

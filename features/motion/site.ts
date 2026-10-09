@@ -5,12 +5,7 @@ import type { Particles, ScrollInput } from "@/features/particles/scene";
 
 import { gather, type MotionEnv, startCursor, startParticles } from "./shared";
 
-/**
- * Site-wide motion that outlives page navigations: the particle scene and the custom cursor.
- * Mounted once from the root layout, so the cloud morphs between pages instead of reloading.
- * Pages steer it: home plugs in its scroll input, case studies and the 404 hold a shape
- * (`sceneShape` in the store).
- */
+/** Site-wide motion that survives navigations: the particle scene and the custom cursor. */
 // Pages mount before the layout's effect runs, so they wait on this rather than on the load.
 let resolve: (p: Particles | null) => void = () => {};
 let settled = false;
@@ -19,17 +14,13 @@ let current: Particles | null = null;
 let siteCtx: gsap.Context | null = null;
 let scrollSource: (() => ScrollInput) | null = null;
 
-/** The particle scene once it has loaded (null if it failed or there is no canvas). */
 export const whenParticles = () => ready;
-/** The loaded scene right now, if any. */
 export const getParticles = () => current;
 
 /**
- * Gathers the cloud in from scattered. The tween must belong to the site's gsap context, not
- * the caller's: GSAP runs callbacks in the context that created them, so a page-owned tween
- * would be reverted (scattering the cloud) when that page unmounts. `ignore` clears the
- * caller's context first; calling `add` with it still active would nest the whole site
- * context inside the page's, and leaving the page would revert the cursor too.
+ * Tweens on the cloud must live in the site's gsap context: GSAP runs callbacks in the context
+ * that created them, so a page-owned tween is reverted when that page unmounts. `ignore()`
+ * first, or `add()` nests the whole site context inside the caller's.
  */
 export function gatherCloud(p: Particles | null = current): boolean {
   const ctx = siteCtx;
@@ -38,7 +29,7 @@ export function gatherCloud(p: Particles | null = current): boolean {
   return true;
 }
 
-/** Home registers its scroll-driven input; pass null on teardown to hold the last position. */
+/** null holds the cloud at its last scroll position. */
 export function setScrollSource(fn: (() => ScrollInput) | null): void {
   scrollSource = fn;
 }

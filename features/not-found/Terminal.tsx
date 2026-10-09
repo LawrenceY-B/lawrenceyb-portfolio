@@ -25,14 +25,10 @@ const HELP = [
   ["sudo fix", "try to fix the bulb"],
   ["clear", "clear the screen"],
 ] as const;
-// Scrollback kept on screen.
 const MAX_LINES = 24;
 const HOME = new Set(["cd", "cd ~", "cd /", "cd ..", "cd ~/", "home", "exit", "logout"]);
 
-/**
- * The 404's request log, as a working prompt. Commands only ever lead home: this page is a
- * dead end on purpose. `sudo fix` restores power to the bulb, briefly.
- */
+/** Commands only ever lead home: the 404 is a dead end on purpose. */
 export function Terminal() {
   const path = usePath();
   const router = useRouter();

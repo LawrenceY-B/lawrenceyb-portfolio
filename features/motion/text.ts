@@ -57,7 +57,6 @@ export function split(el: HTMLElement): Split {
 
 const GLYPHS = "!<>-_\\/[]{}=+*^?#01";
 
-/** Decodes text left to right through random glyphs. */
 export function scramble(el: HTMLElement, duration = 0.8): gsap.core.Tween {
   const text = el.textContent ?? "";
   const o = { p: 0 };

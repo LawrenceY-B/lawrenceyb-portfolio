@@ -79,7 +79,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body>
-        {/* Site-wide and persistent: the cloud morphs between pages instead of reloading. */}
         <ParticleCanvas />
         {children}
         <Cursor />

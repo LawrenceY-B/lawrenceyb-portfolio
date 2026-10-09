@@ -14,7 +14,6 @@ const orientation = () =>
     (typeof DeviceOrientationEvent & OrientationPermission) | undefined;
 
 const noop = () => () => {};
-/** Touch devices with a motion sensor, when motion is welcome. Client-only. */
 const useSupported = () =>
   useSyncExternalStore(
     noop,
@@ -47,10 +46,6 @@ const remember = (on: boolean) => {
   }
 };
 
-/**
- * Tilt the phone to tilt the particle cloud. On by default where motion access is already
- * granted (Android); iOS asks for it, so there it starts off and this button requests it.
- */
 export function TiltToggle() {
   const supported = useSupported();
   const on = useStore(ui, (s) => s.tilt);

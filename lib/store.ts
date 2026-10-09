@@ -1,17 +1,9 @@
 import { createStore } from "zustand/vanilla";
 
-/**
- * Shared UI state. React components (project rows, theme, inspect) and the imperative
- * motion/particle modules read and write it instead of sharing DOM globals.
- */
 export type UiState = {
-  /** The hovered/focused project row's particle shape id, or null when none. */
   hoveredShape: number | null;
-  /** The resolved colour scheme. */
   theme: "light" | "dark";
-  /** Whether inspect mode is on. */
   inspect: boolean;
-  /** Phone tilt steers the particle cloud (touch devices; see components/TiltToggle.tsx). */
   tilt: boolean;
   /** Particle shape a page holds (case studies, 404), or null to follow scroll (home). */
   sceneShape: number | null;
@@ -28,7 +20,7 @@ export const ui = createStore<UiState>()(() => ({
   tilt: false,
 }));
 
-/** Calls `fn` whenever `key` changes. Returns an unsubscribe. */
+/** Calls `fn` when `key` changes, not on every write. Returns an unsubscribe. */
 export function watch<K extends keyof UiState>(
   key: K,
   fn: (value: UiState[K]) => void,

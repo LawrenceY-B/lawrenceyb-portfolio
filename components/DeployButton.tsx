@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/** The playful "Deploy" button in the What I build section. */
 export function DeployButton() {
   const [label, setLabel] = useState("Deploy");
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);

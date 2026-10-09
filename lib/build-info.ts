@@ -23,7 +23,6 @@ function commitSha(): string | null {
 
 const sha = commitSha();
 
-/** Resolved once at build time (static export). */
 export const buildInfo = {
   version: pkg.version,
   commit: sha,

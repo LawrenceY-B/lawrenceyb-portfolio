@@ -6,11 +6,7 @@ import { ui } from "@/lib/store";
 
 import { type MotionEnv, startGlass, startSmoothScroll } from "./shared";
 
-/**
- * Case study pages and the 404: the same smooth scroll and glass as home, with the site-wide
- * particle cloud held on the page's shape (it morphs there from whatever was showing).
- * Returns a cleanup, like `initExperience`.
- */
+/** Case studies and the 404: page effects, with the cloud held on `shape`. */
 export function initCaseExperience(shape: number): () => void {
   const reduce = prefersReducedMotion();
   const ac = new AbortController();
@@ -23,7 +19,6 @@ export function initCaseExperience(shape: number): () => void {
   const ctx = gsap.context(() => {
     startSmoothScroll(env);
     startGlass(env);
-    // Content rises in under the morphing title, as the old case sheet did.
     if (!reduce)
       gsap.from(".case .lede, .case .facts, .case .chapters, .case .log, .case-nav, .lost .glass", {
         y: 28,

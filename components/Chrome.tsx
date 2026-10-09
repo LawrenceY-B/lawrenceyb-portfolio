@@ -1,4 +1,3 @@
-/** Fixed page furniture rendered outside <main>: preloader, particle canvas, custom cursor. */
 export function Loader() {
   return (
     <div id="loader" aria-hidden="true">
