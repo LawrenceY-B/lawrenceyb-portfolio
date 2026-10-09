@@ -1,5 +1,5 @@
-/** Particle shape ids (see features/particles/shapes.ts ORDER, offset by 1 for the head). */
-export const SHAPE = { phone: 5, percent: 6, bubbles: 7, cap: 8 } as const;
+/** Particle shape ids (see features/particles/shapes.ts ORDER, offset by 1 for the head). `bulb` is the 404 page. */
+export const SHAPE = { phone: 5, percent: 6, bubbles: 7, cap: 8, bulb: 15 } as const;
 
 export type Link = { label: string; href: string };
 export type Fact = { label: string; value: string } | { label: string; links: Link[] };

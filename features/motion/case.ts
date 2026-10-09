@@ -12,7 +12,7 @@ import {
 } from "./shared";
 
 /**
- * Case study pages: the same smooth scroll, glass, cursor and particle cloud as home, with the
+ * Case study pages and the 404: the same smooth scroll, glass, cursor and particle cloud as home, with the
  * cloud held on the project's own shape. Returns a cleanup, like `initExperience`.
  */
 export function initCaseExperience(shape: number): () => void {

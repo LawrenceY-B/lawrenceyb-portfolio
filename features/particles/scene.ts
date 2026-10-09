@@ -9,7 +9,7 @@ import { BH, N, type Prepared, TH, TW } from "./prepare";
 
 /**
  * Shape id per scroll stop. Ids: 0 head, 1 code, 2 braces, 3 bolt, 4 cards, 5 phone, 6 percent,
- * 7 bubbles, 8 cap, 9 bars, 10 git, 11 layers, 12 car, 13 ball, 14 book.
+ * 7 bubbles, 8 cap, 9 bars, 10 git, 11 layers, 12 car, 13 ball, 14 book, 15 bulb (404 only).
  * Section order: hero, build(3), work, numbers, about, off(4), stack, contact.
  */
 const IDS = [0, 1, 2, 3, 4, 9, 10, 12, 13, 14, 11, 0] as const;

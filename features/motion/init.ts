@@ -157,7 +157,7 @@ export function initExperience(): () => void {
       const t0 = performance.now();
       const lines = [
         "$ build lyb.portfolio",
-        "  ✓ 14 shapes · 40,000 particles",
+        "  ✓ 15 shapes · 40,000 particles",
         "  ↓ GET /api/get-all-tbill",
         "  ↓ GET /api/gse/market",
         "  ↓ GET /api/gse/stocks",

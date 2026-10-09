@@ -20,6 +20,7 @@ export const ORDER = [
   "car",
   "ball",
   "book",
+  "bulb",
 ] as const;
 export type ShapeName = (typeof ORDER)[number];
 
@@ -600,6 +601,134 @@ export function buildShapes(N: number, rand: () => number): Record<ShapeName, Fl
       parts.push({ g: box(0.06, 1.5, 0.1), m: T(s * 1.16, 0, -0.01), c: 0, w: 0.8 }),
     );
     out.book = sample(parts, { view: R(-0.6, 0.2, 0.04), w: 2.7, h: 1.9 });
+  }
+  // 15. 404: a broken light bulb. Smooth glass with a jagged hole knocked out of its right-hand
+  // edge, a few shards just outside it, a snapped filament and a threaded base.
+  {
+    const profile = new THREE.SplineCurve(
+      (
+        [
+          [0.27, -0.42],
+          [0.3, -0.28],
+          [0.44, -0.06],
+          [0.66, 0.18],
+          [0.78, 0.46],
+          [0.75, 0.78],
+          [0.58, 1.03],
+          [0.32, 1.16],
+          [0.001, 1.2],
+        ] as const
+      ).map(([x, y]) => new THREE.Vector2(x, y)),
+    ).getPoints(72);
+    const full = new THREE.LatheGeometry(profile, 120).toNonIndexed();
+    // Lathe angle 0 faces the camera and the glass is see-through, so the hole goes on the
+    // right-hand silhouette (angle π/2), where it reads as a bite out of the outline.
+    const src = full.attributes.position!.array as ArrayLike<number>;
+    const kept: number[] = [];
+    for (let i = 0; i < src.length; i += 9) {
+      const cx = (src[i]! + src[i + 3]! + src[i + 6]!) / 3;
+      const cy = (src[i + 1]! + src[i + 4]! + src[i + 7]!) / 3;
+      const cz = (src[i + 2]! + src[i + 5]! + src[i + 8]!) / 3;
+      const t = (cy - 0.32) / 0.78;
+      if (t > 0 && t < 1) {
+        const off = Math.abs(Math.atan2(cx, cz) - Math.PI / 2);
+        // Jagged crack: a lens-shaped hole whose edge zig-zags with height.
+        const edge =
+          Math.sin(Math.PI * t) * (0.62 + 0.2 * Math.sin(cy * 31) + 0.12 * Math.sin(cy * 73 + 1));
+        if (off < edge) continue;
+      }
+      // Glass reads at its edges: keep faces seen side-on (the outline) and a sparse fill.
+      const ux = src[i + 3]! - src[i]!;
+      const uy = src[i + 4]! - src[i + 1]!;
+      const vx = src[i + 6]! - src[i]!;
+      const vy = src[i + 7]! - src[i + 1]!;
+      const uz = src[i + 5]! - src[i + 2]!;
+      const vz = src[i + 8]! - src[i + 2]!;
+      const nz = ux * vy - uy * vx;
+      const nl = Math.hypot(uy * vz - uz * vy, uz * vx - ux * vz, nz) || 1;
+      if (Math.abs(nz / nl) > 0.42 && (i / 9) % 7 !== 0) continue;
+      for (let k = 0; k < 9; k++) kept.push(src[i + k]!);
+    }
+    const glass = new THREE.BufferGeometry();
+    glass.setAttribute("position", new THREE.Float32BufferAttribute(kept, 3));
+    full.dispose();
+
+    const parts: Part[] = [
+      { g: glass, c: 0, w: 1.6, ds: true },
+      // Filament supports.
+      ...[-1, 1].map((k) => ({
+        g: tube(
+          [
+            [k * 0.08, -0.36, 0],
+            [k * 0.1, 0.05, 0],
+            [k * 0.2, 0.45, 0],
+          ],
+          0.014,
+        ),
+        c: 0,
+        w: 4,
+      })),
+      // Left half of the filament, still glowing, ending in a snapped tip.
+      {
+        g: tube(
+          [
+            [-0.2, 0.45, 0],
+            [-0.14, 0.6, 0.02],
+            [-0.05, 0.64, 0.03],
+            [0.01, 0.58, 0.03],
+          ],
+          0.02,
+        ),
+        c: 2,
+        w: 10,
+      },
+      // The other half, hanging off the right support.
+      {
+        g: tube(
+          [
+            [0.2, 0.45, 0],
+            [0.2, 0.32, 0.04],
+            [0.15, 0.2, 0.07],
+            [0.11, 0.14, 0.07],
+          ],
+          0.02,
+        ),
+        c: 1,
+        w: 10,
+      },
+      // Threaded base and contact.
+      ...Array.from({ length: 5 }, (_, i) => ({
+        g: cyl(i % 2 ? 0.27 : 0.29, i % 2 ? 0.29 : 0.27, 0.1, 48),
+        m: T(0, -0.48 - i * 0.1, 0),
+        c: 0,
+        w: 0.8,
+      })),
+      { g: cyl(0.2, 0.1, 0.1, 32), m: T(0, -1.01, 0), c: 0, w: 1.2 },
+    ];
+    // Shards that just broke off, still close to the hole.
+    const shards: [number, number, number, number, number][] = [
+      [0.9, 0.86, 0.12, 0.5, 0.12],
+      [1.03, 1.02, 0.02, 1.9, 0.09],
+      [0.97, 0.62, 0.16, 3.1, 0.07],
+    ];
+    shards.forEach(([x, y, z, r, size]) =>
+      parts.push({
+        g: ext(
+          poly([
+            [0, 0],
+            [size, size * 0.25],
+            [size * 0.3, size * 0.9],
+          ]),
+          0.006,
+          0,
+        ),
+        m: C(T(x, y, z), R(r, r * 0.7, r * 1.3)),
+        c: 0,
+        w: 3,
+        ds: true,
+      }),
+    );
+    out.bulb = sample(parts, { view: R(0.08, -0.15, 0.06), w: 1.9, h: 1.95 });
   }
   return out;
 }
