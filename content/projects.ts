@@ -54,53 +54,32 @@ export const projects: Project[] = [
     body: [
       {
         label: "Why",
-        text: "I wanted to learn Java and Spring Boot on something closer to a real financial system than a CRUD app. Trading touches the hard parts of backend work: money, concurrency, async flows, third-party integrations and a real industry protocol. And I wanted to design for a Ghanaian user, with a cedi wallet, local payments and local stocks.",
-      },
-      {
-        label: "Problem",
-        items: [
-          "Ghanaian investors rarely get a low-risk way to learn trading across local and international markets.",
-          "Money has to stay correct under concurrent actions, like a deposit landing while an order is placed.",
-          "A GHS wallet buying USD stocks has to avoid rounding and exchange-rate drift bugs.",
-        ],
+        text: "To learn Java and Spring Boot on something closer to a real financial system than a CRUD app, and to give Ghanaian investors a low-risk way to practise across local and US markets.",
       },
       {
         label: "Features",
         items: [
-          "Two markets: US stocks in USD and GSE stocks in GHS, with the other currency shown next to each price.",
-          "A ledger wallet: an append-only log with available and reserved balances. Placing an order holds the funds; a fill debits them; a reject or cancel releases them.",
-          "Deposits through real Paystack test-mode checkout, confirmed by signature-verified webhooks. Withdrawals are simulated.",
-          "Market and limit orders, with cancel and amend sent as FIX cancel/replace messages.",
-          "Log in with a password, Google or Apple, then a PIN or biometric check before every trade.",
-          "Search, and top gainers and losers for both markets.",
+          "US stocks in USD and GSE stocks in GHS, traded from one cedi wallet.",
+          "A ledger wallet: placing an order holds the funds, a fill debits them, a cancel releases them.",
+          "Deposits through Paystack test-mode checkout, confirmed by signature-verified webhooks.",
+          "Market and limit orders, with cancel and amend over FIX.",
         ],
       },
       {
         label: "Architecture",
-        text: "Three parts: the Flutter app, an order service (Spring Boot and Postgres) that owns the wallet and orders, and a separate fake exchange that talks to it only over FIX. US prices come from Twelve Data and FMP, Ghana prices from my Treasury Bills API. Every price is cached in Postgres, so the app never waits on an outside API.",
+        text: "A Flutter app, a Spring Boot and Postgres order service that owns the wallet and orders, and a separate fake exchange that only speaks FIX. Prices are cached in Postgres, so the app never waits on an outside API.",
       },
       {
         label: "Decisions",
         items: [
-          "A ledger instead of a balance column: an audit trail, and no lost updates under concurrency.",
-          "Each order records its exchange rate, so the hold and the debit are worked out the same way and can't drift apart.",
-          "The market is a property of the stock: GSE and US orders share one code path, and only the price source and conversion differ.",
-          "Market data sits behind a provider interface, so adding or swapping a source doesn't touch order, wallet or FIX code.",
-          "Deliberate limits: no partial fills, no short selling, and GSE data is end-of-day.",
-          "Passkeys can wait: the server side is as much work as the FIX engine, so they're a stretch goal.",
+          "A ledger instead of a balance column, for an audit trail and no lost updates under concurrency.",
+          "Each order records its exchange rate, so the hold and the debit can't drift apart.",
+          "Market data sits behind a provider interface, so swapping a source never touches order or FIX code.",
         ],
       },
       {
-        label: "Design",
-        text: "A dark fintech interface with an Apple Liquid Glass tab bar and cards. Four tabs: Home, Search, Orders and Profile, with the wallet under Profile. Deposits, withdrawals and trades all end in a swipe to confirm.",
-      },
-      {
         label: "Plan",
-        text: "Eight weeks in two blocks. Month 1: auth, wallet, orders and the Flutter app. Month 2: the FIX exchange, cancel and amend, live market data and polish. Stretch goals: partial fills, passkeys, GSE charts and T-bill rates.",
-      },
-      {
-        label: "Learning",
-        text: "Spring Boot and JPA, transactions and optimistic locking, webhook security, FIX messaging, Flutter state management, and designing around real-world limits.",
+        text: "Eight weeks: auth, wallet, orders and the app first, then the FIX exchange, live prices and polish.",
       },
     ],
   },
