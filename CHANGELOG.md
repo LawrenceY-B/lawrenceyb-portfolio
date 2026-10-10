@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/LawrenceY-B/lawrenceyb-portfolio/compare/v0.2.0...v0.3.0) (2026-10-10)
+
+
+### Features
+
+* update the Friendwave case study with the live app and screenshots ([#18](https://github.com/LawrenceY-B/lawrenceyb-portfolio/issues/18)) ([f223f13](https://github.com/LawrenceY-B/lawrenceyb-portfolio/commit/f223f1320aef0ba1e951b1c7231aa89166bd7230))
+
 ## [0.2.0](https://github.com/LawrenceY-B/lawrenceyb-portfolio/compare/v0.1.0...v0.2.0) (2026-10-09)
 
 
