@@ -960,6 +960,19 @@ footer .build a:hover {
   margin: 0;
   max-width: 62ch;
 }
+.shots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 48px;
+}
+.shots img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
 .lost .case-in {
   min-height: 100svh;
   display: flex;
@@ -1176,6 +1189,10 @@ footer .build a:hover {
   }
 }
 @media (max-width: 560px) {
+  .shots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
   .glass .hide-sm {
     display: none;
   }
