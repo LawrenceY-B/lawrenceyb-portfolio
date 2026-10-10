@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/LawrenceY-B/lawrenceyb-portfolio/compare/v0.3.0...v0.4.0) (2026-10-10)
+
+
+### Features
+
+* expand the Trade Sim case study and show live API responses for Treasury Bills ([#21](https://github.com/LawrenceY-B/lawrenceyb-portfolio/issues/21)) ([5b39028](https://github.com/LawrenceY-B/lawrenceyb-portfolio/commit/5b39028bc5763302dbb53d46599cd48cbda8471e))
+
 ## [0.3.0](https://github.com/LawrenceY-B/lawrenceyb-portfolio/compare/v0.2.0...v0.3.0) (2026-10-10)
 
 
