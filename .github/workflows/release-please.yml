@@ -14,7 +14,7 @@ jobs:
     steps:
       # Keeps a "chore(main): release x.y.z" PR up to date with the next version and changelog.
       # Merging it bumps package.json, tags vX.Y.Z and publishes a GitHub Release.
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
