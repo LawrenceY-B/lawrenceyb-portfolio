@@ -15,6 +15,7 @@ export type Project = {
   lede: string;
   facts: Fact[];
   body: { label: string; text: string }[];
+  shots?: { src: string; alt: string }[];
 };
 
 export const projects: Project[] = [
@@ -92,24 +93,57 @@ export const projects: Project[] = [
     slug: "friendwave",
     shape: SHAPE.bubbles,
     name: "Friendwave",
-    year: "2023",
-    stack: "Node · MongoDB",
-    desc: "A social app with posts, stories and messaging. Real-time chat on the way.",
-    lede: "A full social backend built to learn how feeds, stories and messaging fit together. My most-starred repository.",
+    year: "2026",
+    stack: "Next.js · Node",
+    desc: "An Instagram-style social app. Feed, stories, chat and notifications, all live.",
+    lede: "A full social app, from API to phone screen. Likes, comments, chats and notifications update as they happen, so it behaves like a real product rather than a demo.",
     facts: [
-      { label: "Role", value: "Solo" },
-      { label: "Stack", value: "Node, Express, MongoDB, TypeScript, Auth0 + JWT" },
+      { label: "Role", value: "Solo · design + engineering" },
+      {
+        label: "Stack",
+        value: "Next.js 16, React 19, Node, Express, MongoDB, socket.io, Auth0, S3",
+      },
       {
         label: "Links",
-        links: [{ label: "GitHub ↗", href: "https://github.com/LawrenceY-B/Friendwave" }],
+        links: [
+          { label: "Live app ↗", href: "https://friendwave-web.vercel.app" },
+          {
+            label: "API docs ↗",
+            href: "https://documenter.getpostman.com/view/21114618/2s9YeD9DWK",
+          },
+          { label: "API on GitHub ↗", href: "https://github.com/LawrenceY-B/Friendwave" },
+          { label: "Web on GitHub ↗", href: "https://github.com/LawrenceY-B/friendwave-web" },
+        ],
       },
     ],
     body: [
       {
         label: "Features",
-        text: "Follow and unfollow, posts, comments, stories and messaging, with authentication through Auth0 and JWT.",
+        text: "Posts, comments and replies, stories, follows and search. Chats with photos, typing indicators and unread counts. Notifications, and deleting your account.",
       },
-      { label: "Next", text: "Real-time messaging over WebSockets." },
+      {
+        label: "Live",
+        text: "One socket.io connection per tab carries messages, like and comment counts, new posts in the feed, notifications and who is online. The client only subscribes to the posts on screen.",
+      },
+      {
+        label: "API",
+        text: "44 endpoints over 7 resources. One OpenAPI spec generates the frontend's types and the Postman collection. 36 tests cover every endpoint, auth, permissions and realtime.",
+      },
+      {
+        label: "Frontend",
+        text: "Server Components fetch on the server. Likes and follows are Server Actions with optimistic UI. GSAP and Lenis handle the motion: the double-tap heart, stories that swing in 3D, counts that roll like an odometer.",
+      },
+    ],
+    shots: [
+      { src: "/work/friendwave/feed.jpg", alt: "Home feed" },
+      { src: "/work/friendwave/stories.jpg", alt: "Watching a story" },
+      { src: "/work/friendwave/post.jpg", alt: "A post with comments and replies" },
+      { src: "/work/friendwave/chats.jpg", alt: "Your chats" },
+      { src: "/work/friendwave/chat.jpg", alt: "A chat, with a photo message" },
+      { src: "/work/friendwave/notifications.jpg", alt: "Notifications" },
+      { src: "/work/friendwave/search.jpg", alt: "Search" },
+      { src: "/work/friendwave/profile.jpg", alt: "Your profile" },
+      { src: "/work/friendwave/edit-profile.jpg", alt: "Edit profile" },
     ],
   },
   {

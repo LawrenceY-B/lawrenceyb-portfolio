@@ -86,6 +86,22 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
               </section>
             ))}
           </div>
+          {p.shots && (
+            <div className="shots">
+              {p.shots.map((s) => (
+                // eslint-disable-next-line @next/next/no-img-element -- static export, images are unoptimized
+                <img
+                  key={s.src}
+                  src={s.src}
+                  alt={s.alt}
+                  width={599}
+                  height={1298}
+                  loading="lazy"
+                  decoding="async"
+                />
+              ))}
+            </div>
+          )}
           <nav className="case-nav" aria-label="More case studies">
             <Link
               href={`/work/${prev.slug}`}

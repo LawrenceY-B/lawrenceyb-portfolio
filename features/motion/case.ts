@@ -20,14 +20,17 @@ export function initCaseExperience(shape: number): () => void {
     startSmoothScroll(env);
     startGlass(env);
     if (!reduce)
-      gsap.from(".case .lede, .case .facts, .case .chapters, .case .log, .case-nav, .lost .glass", {
-        y: 28,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.07,
-        delay: 0.2,
-        ease: "power3.out",
-      });
+      gsap.from(
+        ".case .lede, .case .facts, .case .chapters, .case .shots, .case .log, .case-nav, .lost .glass",
+        {
+          y: 28,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.07,
+          delay: 0.2,
+          ease: "power3.out",
+        },
+      );
   });
   ui.setState({ sceneShape: shape });
   cleanups.push(() => ui.setState({ sceneShape: null }));
