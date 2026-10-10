@@ -21,7 +21,7 @@ export function initCaseExperience(shape: number): () => void {
     startGlass(env);
     if (!reduce)
       gsap.from(
-        ".case .lede, .case .facts, .case .chapters, .case .shots, .case .log, .case-nav, .lost .glass",
+        ".case .lede, .case .facts, .case .chapters, .case .api, .case .shots, .case .log, .case-nav, .lost .glass",
         {
           y: 28,
           opacity: 0,

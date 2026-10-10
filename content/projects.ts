@@ -1,6 +1,8 @@
 /** Particle shape ids (see features/particles/shapes.ts ORDER, offset by 1 for the head). `bulb` is the 404 page. */
 export const SHAPE = { phone: 5, percent: 6, bubbles: 7, cap: 8, bulb: 15 } as const;
 
+import { treasurySamples } from "@/content/treasury-samples";
+
 export type Link = { label: string; href: string };
 export type Fact = { label: string; value: string } | { label: string; links: Link[] };
 
@@ -14,8 +16,21 @@ export type Project = {
   desc: string;
   lede: string;
   facts: Fact[];
-  body: { label: string; text: string }[];
+  body: Chapter[];
   shots?: { src: string; alt: string }[];
+  api?: ApiSample[];
+};
+
+/** A case study section: a paragraph, or a list when the points stand alone. */
+export type Chapter = { label: string; text: string } | { label: string; items: string[] };
+
+/** A recorded API response, shown as code on the case study. */
+export type ApiSample = {
+  label: string;
+  path: string;
+  href: string;
+  note: string;
+  response: unknown;
 };
 
 export const projects: Project[] = [
@@ -23,28 +38,69 @@ export const projects: Project[] = [
     slug: "trade-sim",
     shape: SHAPE.phone,
     name: "Trade Sim",
-    badge: "In progress",
+    badge: "In planning",
     year: "2026",
-    stack: "Mobile · Spring Boot",
-    desc: "A stock trading simulator. Practise investing with fake money and real decisions.",
-    lede: "Investing feels risky when you are starting out. Trade Sim gives you a paper balance and a real market to practise on, so the first mistakes cost nothing.",
+    stack: "Flutter · Spring Boot",
+    desc: "A stock trading simulator for US and Ghana stocks, with a cedi wallet and real FIX order flow.",
+    lede: "Deposit simulated cedis, then trade US stocks and the Ghana Stock Exchange. Every order is sent as a FIX message, the protocol real brokerages use, to an exchange I built that fills it and reports back.",
     facts: [
-      { label: "Role", value: "Solo · design + engineering" },
-      { label: "Stack", value: "Java, Spring Boot, Flutter" },
-      { label: "Status", value: "In progress" },
+      { label: "Role", value: "Solo · product, UX, architecture, development" },
+      {
+        label: "Stack",
+        value: "Flutter, Java, Spring Boot, PostgreSQL, QuickFIX/J, Paystack (test mode)",
+      },
+      { label: "Status", value: "Requirements and design done · build starting" },
     ],
     body: [
       {
+        label: "Why",
+        text: "I wanted to learn Java and Spring Boot on something closer to a real financial system than a CRUD app. Trading touches the hard parts of backend work: money, concurrency, async flows, third-party integrations and a real industry protocol. And I wanted to design for a Ghanaian user, with a cedi wallet, local payments and local stocks.",
+      },
+      {
         label: "Problem",
-        text: "Most first-time investors learn by losing money. There is no low-stakes way to try buying, holding and selling.",
+        items: [
+          "Ghanaian investors rarely get a low-risk way to learn trading across local and international markets.",
+          "Money has to stay correct under concurrent actions, like a deposit landing while an order is placed.",
+          "A GHS wallet buying USD stocks has to avoid rounding and exchange-rate drift bugs.",
+        ],
+      },
+      {
+        label: "Features",
+        items: [
+          "Two markets: US stocks in USD and GSE stocks in GHS, with the other currency shown next to each price.",
+          "A ledger wallet: an append-only log with available and reserved balances. Placing an order holds the funds; a fill debits them; a reject or cancel releases them.",
+          "Deposits through real Paystack test-mode checkout, confirmed by signature-verified webhooks. Withdrawals are simulated.",
+          "Market and limit orders, with cancel and amend sent as FIX cancel/replace messages.",
+          "Log in with a password, Google or Apple, then a PIN or biometric check before every trade.",
+          "Search, and top gainers and losers for both markets.",
+        ],
       },
       {
         label: "Architecture",
-        text: "A Spring Boot API owns accounts, orders and portfolio valuation. The mobile client stays thin and talks to it over REST.",
+        text: "Three parts: the Flutter app, an order service (Spring Boot and Postgres) that owns the wallet and orders, and a separate fake exchange that talks to it only over FIX. US prices come from Twelve Data and FMP, Ghana prices from my Treasury Bills API. Every price is cached in Postgres, so the app never waits on an outside API.",
       },
       {
-        label: "Next",
-        text: "Ghana T-bills as a simulated asset, priced from my own Treasury Bills API.",
+        label: "Decisions",
+        items: [
+          "A ledger instead of a balance column: an audit trail, and no lost updates under concurrency.",
+          "Each order records its exchange rate, so the hold and the debit are worked out the same way and can't drift apart.",
+          "The market is a property of the stock: GSE and US orders share one code path, and only the price source and conversion differ.",
+          "Market data sits behind a provider interface, so adding or swapping a source doesn't touch order, wallet or FIX code.",
+          "Deliberate limits: no partial fills, no short selling, and GSE data is end-of-day.",
+          "Passkeys can wait: the server side is as much work as the FIX engine, so they're a stretch goal.",
+        ],
+      },
+      {
+        label: "Design",
+        text: "A dark fintech interface with an Apple Liquid Glass tab bar and cards. Four tabs: Home, Search, Orders and Profile, with the wallet under Profile. Deposits, withdrawals and trades all end in a swipe to confirm.",
+      },
+      {
+        label: "Plan",
+        text: "Eight weeks in two blocks. Month 1: auth, wallet, orders and the Flutter app. Month 2: the FIX exchange, cancel and amend, live market data and polish. Stretch goals: partial fills, passkeys, GSE charts and T-bill rates.",
+      },
+      {
+        label: "Learning",
+        text: "Spring Boot and JPA, transactions and optimistic locking, webhook security, FIX messaging, Flutter state management, and designing around real-world limits.",
       },
     ],
   },
@@ -88,6 +144,7 @@ export const projects: Project[] = [
         text: "The ticker at the top of this page reads from it live. The last good response is cached in your browser, so it shows numbers instantly on repeat visits.",
       },
     ],
+    api: treasurySamples,
   },
   {
     slug: "friendwave",
