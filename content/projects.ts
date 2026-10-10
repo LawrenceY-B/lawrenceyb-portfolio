@@ -138,12 +138,9 @@ export const projects: Project[] = [
       { src: "/work/friendwave/feed.jpg", alt: "Home feed" },
       { src: "/work/friendwave/stories.jpg", alt: "Watching a story" },
       { src: "/work/friendwave/post.jpg", alt: "A post with comments and replies" },
-      { src: "/work/friendwave/chats.jpg", alt: "Your chats" },
       { src: "/work/friendwave/chat.jpg", alt: "A chat, with a photo message" },
       { src: "/work/friendwave/notifications.jpg", alt: "Notifications" },
-      { src: "/work/friendwave/search.jpg", alt: "Search" },
       { src: "/work/friendwave/profile.jpg", alt: "Your profile" },
-      { src: "/work/friendwave/edit-profile.jpg", alt: "Edit profile" },
     ],
   },
   {
