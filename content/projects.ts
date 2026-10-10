@@ -1,6 +1,8 @@
 /** Particle shape ids (see features/particles/shapes.ts ORDER, offset by 1 for the head). `bulb` is the 404 page. */
 export const SHAPE = { phone: 5, percent: 6, bubbles: 7, cap: 8, bulb: 15 } as const;
 
+import { treasurySamples } from "@/content/treasury-samples";
+
 export type Link = { label: string; href: string };
 export type Fact = { label: string; value: string } | { label: string; links: Link[] };
 
@@ -14,8 +16,21 @@ export type Project = {
   desc: string;
   lede: string;
   facts: Fact[];
-  body: { label: string; text: string }[];
+  body: Chapter[];
   shots?: { src: string; alt: string }[];
+  api?: ApiSample[];
+};
+
+/** A case study section: a paragraph, or a list when the points stand alone. */
+export type Chapter = { label: string; text: string } | { label: string; items: string[] };
+
+/** A recorded API response, shown as code on the case study. */
+export type ApiSample = {
+  label: string;
+  path: string;
+  href: string;
+  note: string;
+  response: unknown;
 };
 
 export const projects: Project[] = [
@@ -23,28 +38,48 @@ export const projects: Project[] = [
     slug: "trade-sim",
     shape: SHAPE.phone,
     name: "Trade Sim",
-    badge: "In progress",
+    badge: "In planning",
     year: "2026",
-    stack: "Mobile · Spring Boot",
-    desc: "A stock trading simulator. Practise investing with fake money and real decisions.",
-    lede: "Investing feels risky when you are starting out. Trade Sim gives you a paper balance and a real market to practise on, so the first mistakes cost nothing.",
+    stack: "Flutter · Spring Boot",
+    desc: "A stock trading simulator for US and Ghana stocks, with a cedi wallet and real FIX order flow.",
+    lede: "Deposit simulated cedis, then trade US stocks and the Ghana Stock Exchange. Every order is sent as a FIX message, the protocol real brokerages use, to an exchange I built that fills it and reports back.",
     facts: [
-      { label: "Role", value: "Solo · design + engineering" },
-      { label: "Stack", value: "Java, Spring Boot, Flutter" },
-      { label: "Status", value: "In progress" },
+      { label: "Role", value: "Solo · product, UX, architecture, development" },
+      {
+        label: "Stack",
+        value: "Flutter, Java, Spring Boot, PostgreSQL, QuickFIX/J, Paystack (test mode)",
+      },
+      { label: "Status", value: "Requirements and design done · build starting" },
     ],
     body: [
       {
-        label: "Problem",
-        text: "Most first-time investors learn by losing money. There is no low-stakes way to try buying, holding and selling.",
+        label: "Why",
+        text: "To learn Java and Spring Boot on something closer to a real financial system than a CRUD app, and to give Ghanaian investors a low-risk way to practise across local and US markets.",
+      },
+      {
+        label: "Features",
+        items: [
+          "US stocks in USD and GSE stocks in GHS, traded from one cedi wallet.",
+          "A ledger wallet: placing an order holds the funds, a fill debits them, a cancel releases them.",
+          "Deposits through Paystack test-mode checkout, confirmed by signature-verified webhooks.",
+          "Market and limit orders, with cancel and amend over FIX.",
+        ],
       },
       {
         label: "Architecture",
-        text: "A Spring Boot API owns accounts, orders and portfolio valuation. The mobile client stays thin and talks to it over REST.",
+        text: "A Flutter app, a Spring Boot and Postgres order service that owns the wallet and orders, and a separate fake exchange that only speaks FIX. Prices are cached in Postgres, so the app never waits on an outside API.",
       },
       {
-        label: "Next",
-        text: "Ghana T-bills as a simulated asset, priced from my own Treasury Bills API.",
+        label: "Decisions",
+        items: [
+          "A ledger instead of a balance column, for an audit trail and no lost updates under concurrency.",
+          "Each order records its exchange rate, so the hold and the debit can't drift apart.",
+          "Market data sits behind a provider interface, so swapping a source never touches order or FIX code.",
+        ],
+      },
+      {
+        label: "Plan",
+        text: "Eight weeks: auth, wallet, orders and the app first, then the FIX exchange, live prices and polish.",
       },
     ],
   },
@@ -88,6 +123,7 @@ export const projects: Project[] = [
         text: "The ticker at the top of this page reads from it live. The last good response is cached in your browser, so it shows numbers instantly on repeat visits.",
       },
     ],
+    api: treasurySamples,
   },
   {
     slug: "friendwave",

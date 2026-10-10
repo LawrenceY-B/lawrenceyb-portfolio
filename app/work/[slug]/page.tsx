@@ -6,6 +6,7 @@ import { Fragment, ViewTransition } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TiltToggle } from "@/components/TiltToggle";
 import { getProject, projects } from "@/content/projects";
+import { ApiSamples } from "@/features/case-study/ApiSamples";
 import { Back } from "@/features/case-study/Back";
 import { MORPH, titleName } from "@/features/case-study/transitions";
 import { CaseExperience } from "@/features/motion/CaseExperience";
@@ -82,10 +83,19 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
             {p.body.map((b) => (
               <section key={b.label}>
                 <span className="mono muted">{b.label}</span>
-                <p>{b.text}</p>
+                {"text" in b ? (
+                  <p>{b.text}</p>
+                ) : (
+                  <ul>
+                    {b.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                )}
               </section>
             ))}
           </div>
+          {p.api && <ApiSamples samples={p.api} />}
           {p.shots && (
             <div className="shots">
               {p.shots.map((s) => (
